@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e9dfc8">
+  <meta name="description" content="An editorial reading of Ana Vitória Vanzin Mendes’s lectern script on allegorical images, legal authority, and the evidence that connects them.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='3' fill='%23e9dfc8'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-family='Georgia,serif' font-weight='bold' font-size='25' fill='%2330271e'%3EI%3C/text%3E%3C/svg%3E">
+  <title>Between Representation and Authentication · Iconocracia</title>
+  <style>
+    @font-face{font-family:NewsSong;src:url('assets/news-song.woff2') format('woff2');font-weight:200 900;font-display:swap}
+    @font-face{font-family:Blackletter;src:url('assets/blackletter.ttf') format('truetype');font-display:swap}
+    :root{
+      color-scheme:light;
+      --paper:#e9dfc8;--ink:#30271e;--muted:#625342;--rule:#8f8068;--red:#793f2e;
+      --body-size:16px;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;
+      font-family:NewsSong,Georgia,'Times New Roman',serif;color:var(--ink);background:#d0c4ad;font-synthesis:none
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:72px}
+    body{margin:0;padding-bottom:env(safe-area-inset-bottom,0px);min-width:0}
+    a{color:inherit;text-underline-offset:4px}
+    button{font:inherit;color:inherit;cursor:pointer}
+    a,button,summary{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--red);outline-offset:4px}
+    button:disabled{opacity:.5;cursor:default}
+    h1,h2,h3,h4,p,figure,blockquote{margin:0}
+    button{border-radius:0}
+    img{max-width:100%;height:auto;display:block}
+    .skip{position:fixed;top:-100px;left:8px;z-index:40;background:var(--ink);color:var(--paper);padding:12px 16px;min-height:44px}
+    .skip:focus{top:8px}
+    .toolbar{background:var(--paper);position:sticky;top:0;z-index:20;border-bottom:1px solid var(--rule);padding-top:env(safe-area-inset-top,0px)}
+    .toolbar-inner{max-width:1180px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px))}
+    .toolbar nav{display:flex;gap:2px;min-width:0}
+    .toolbar nav a{font-family:Georgia,serif;font-size:12px;letter-spacing:.02em;min-height:46px;min-width:44px;padding:0 5px;display:flex;align-items:center;justify-content:center;text-decoration:none;border-bottom:3px solid transparent;white-space:nowrap}
+    .toolbar nav a[aria-current="true"]{border-bottom-color:var(--ink);font-weight:700}
+    .toolbar nav a:hover{background:#30271e0b}
+    .tools{display:flex;gap:2px;flex:none}
+    .tools button{height:44px;min-width:44px;padding:0 8px;border:0;background:none;font-family:Georgia,serif;font-size:13px}
+    .tools button:hover{background:#30271e0b}
+    .tools button[aria-pressed="true"]{text-decoration:underline;text-underline-offset:5px}
+    .print-tool{display:none}
+    .read-progress{position:absolute;bottom:-1px;left:0;height:3px;background:var(--red);width:0;pointer-events:none}
+    .paper{position:relative;isolation:isolate;background:var(--paper);max-width:1180px;margin:0 auto;padding:16px 16px 24px;overflow:hidden;min-height:100dvh}
+    .paper::before{content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");background-size:180px}
+    .topline{display:flex;justify-content:space-between;gap:16px;font-size:12px;line-height:1.5;letter-spacing:.04em;border-bottom:1px solid var(--ink);padding-bottom:8px}
+    .topline span:last-child{text-align:right}
+    .masthead{text-align:center;padding:20px 0 16px}
+    .masthead h1{font-family:Blackletter,Georgia,serif;font-size:clamp(46px,13vw,76px);font-weight:400;line-height:1;letter-spacing:-.025em}
+    .english-mast{font-family:Georgia,serif;font-size:12px;letter-spacing:.16em;line-height:1.5;margin-top:12px}
+    .mast-note{font-size:12px;line-height:1.5;letter-spacing:.08em;margin-top:6px}
+    .mast-side{display:none}
+    .edition{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;border-top:4px double var(--ink);border-bottom:1px solid var(--ink);padding:8px 0;font-size:12px;line-height:1.5}
+    .edition span:last-child{font-weight:700}
+    .issue-theme{padding:16px 0 18px;border-bottom:3px double var(--ink);text-align:center}
+    .issue-theme>span{font-size:12px;letter-spacing:.18em}
+    .issue-theme h2{font-size:clamp(20px,5vw,28px);line-height:1.3;letter-spacing:.02em;margin-top:6px;font-weight:800;text-wrap:balance}
+    .issue-theme p{font-size:14px;line-height:1.6;color:var(--muted);margin-top:6px}
+    .edition-grid{display:grid;grid-template-columns:minmax(0,1fr)}
+    .story{padding:24px 0;border-bottom:1px solid var(--ink);scroll-margin-top:60px;min-width:0}
+    .section-label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;letter-spacing:.1em;margin-bottom:16px}
+    .section-number{font-family:Georgia,serif;font-size:22px;font-style:italic;letter-spacing:0}
+    .section-name{display:flex;align-items:center;gap:8px}
+    .section-name::before{content:"";width:7px;height:7px;background:var(--ink);transform:rotate(45deg);flex:none}
+    .headline{font-size:clamp(29px,8vw,40px);line-height:1.12;letter-spacing:-.035em;font-weight:900;text-wrap:balance}
+    .lead-headline{font-size:clamp(34px,9.5vw,50px);line-height:1.08}
+    .deck{font-size:17px;line-height:1.6;margin-top:12px;font-weight:650}
+    .byline{display:flex;gap:8px 16px;flex-wrap:wrap;font-family:Georgia,serif;font-size:12px;line-height:1.6;color:var(--muted);margin-top:12px}
+    .engraving{margin:20px 0 16px}
+    .image-frame{border-block:1px solid var(--ink);padding:8px 0;position:relative;background:#e9dfc8}
+    .engraving img{width:100%;filter:grayscale(1) contrast(1.12);mix-blend-mode:multiply}
+    .facsimile img{aspect-ratio:910/1287;object-fit:contain}
+    .engraving figcaption{display:flex;justify-content:space-between;gap:12px;font-size:12px;line-height:1.55;color:var(--muted);margin-top:8px}
+    .engraving figcaption span:first-child{max-width:82%}
+    .story-body{font-size:var(--body-size);line-height:1.75;text-align:left;overflow-wrap:break-word;hyphens:auto}
+    .story-body p+p{margin-top:14px}
+    .drop-cap::first-letter{float:left;font-size:3.15em;line-height:1;margin:6px 8px 0 0;font-weight:800}
+    .thin-heading{font-size:21px;line-height:1.35;font-weight:800;padding:10px 0 9px;border-top:3px double var(--ink);border-bottom:1px solid var(--rule);margin:24px 0 12px}
+    .mini-kicker{font-family:Georgia,serif;font-size:12px;letter-spacing:.12em;display:block;margin-bottom:10px}
+    .fact-box{padding:16px 14px;border:1px solid var(--ink);outline:1px solid var(--rule);outline-offset:3px;margin:24px 4px 20px}
+    .fact-box h3{font-size:21px;line-height:1.35}
+    .fact-box p{font-size:14px;line-height:1.75;margin-top:10px}
+    .evidence-list{list-style:none;padding:0;margin:12px 0 0}
+    .evidence-list li{padding:10px 0;border-top:1px solid var(--rule);font-size:14px;line-height:1.65}
+    .evidence-list strong{display:block;font-size:16px}
+    .fold{border-top:1px solid var(--rule);margin-top:18px}
+    .fold summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:750;min-height:48px;gap:12px}
+    .fold summary::-webkit-details-marker{display:none}
+    .fold summary::after{content:"＋";font-family:Georgia,serif;font-size:22px}
+    .fold[open] summary::after{content:"−"}
+    .fold>div{font-size:15px;line-height:1.75;padding:4px 0 14px}
+    .reading-note{background:#30271e07;border-left:2px solid var(--ink);padding:12px 14px;font-size:14px;line-height:1.75;margin-top:18px}
+    .source-link{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:48px;border-block:1px solid var(--ink);padding:10px 0;margin-top:20px;font-size:14px;font-weight:700;text-decoration:none}
+    .source-link:hover span:first-child{text-decoration:underline}
+  </style>
+  <style>
+    .benchmark{display:flex;gap:16px;align-items:center;border-block:1px solid var(--rule);padding:16px 0;margin:20px 0}
+    .benchmark strong{font:52px Georgia,serif;letter-spacing:-.06em;white-space:nowrap}
+    .benchmark p{font-size:13px;line-height:1.65}
+    .footnote{font-size:12px!important;line-height:1.65!important;color:var(--muted);margin-top:10px}
+    .legal-notes{margin:20px 0 0;display:grid;gap:16px}
+    .legal-notes section{border-top:1px solid var(--rule);padding-top:12px}
+    .legal-notes h3{font-size:17px;line-height:1.45;font-weight:800;display:flex;gap:8px;align-items:baseline}
+    .legal-notes h3 span{font:italic 14px Georgia,serif}
+    .legal-notes p{font-size:14px;line-height:1.75;margin-top:6px}
+    .quote{border-block:3px double var(--ink);padding:20px 4px 18px;margin:24px 0 8px;text-align:center}
+    .quote p{font-size:23px;font-weight:750;line-height:1.5;text-wrap:balance}
+    .quote cite{display:block;font-size:12px;font-style:normal;color:var(--muted);margin-top:10px;line-height:1.5}
+    .method{padding:24px 0}
+    .advert{border:1px solid var(--ink);outline:3px double var(--ink);outline-offset:-7px;padding:24px 18px 20px;text-align:center;position:relative}
+    .advert::before,.advert::after{position:absolute;top:16px;content:"✦";font-size:14px}
+    .advert::before{left:18px}.advert::after{right:18px}
+    .ad-eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;margin-bottom:16px}
+    .ad-title{font-family:Georgia,serif;font-size:48px;line-height:.95;letter-spacing:-.055em;font-weight:900}
+    .ad-title span{display:block;font-size:64px}
+    .ad-rule{width:48px;height:1px;background:var(--ink);margin:20px auto 16px}
+    .ad-subtitle{font-size:18px;font-weight:800;line-height:1.5;margin:0 auto 14px;text-wrap:balance}
+    .ad-body{font-size:15px;line-height:1.75;text-align:left}
+    .verb-list{list-style:none;padding:0;margin:16px 0;text-align:left}
+    .verb-list li{border-top:1px solid var(--rule);padding:12px 0;font-size:14px;line-height:1.65}
+    .verb-list strong{font-size:18px;display:block;margin-bottom:3px}
+    .ad-byline{font-size:12px;line-height:1.6;color:var(--muted);margin-top:16px}
+    .mini-ad{border:1px solid var(--ink);margin:24px 0 0;padding:18px}
+    .mini-ad h3{font-size:25px;line-height:1.25;text-align:center;font-weight:900}
+    .mini-ad .mini-kicker{text-align:center}
+    .comparison-block{margin-top:16px;border-top:1px solid var(--rule);padding-top:14px}
+    .comparison-block h4{font:700 18px Georgia,serif;margin:0 0 8px}
+    .comparison-block p{font-size:14px;line-height:1.75}
+    .comparison-block p+p{margin-top:10px}
+    .method .star-picture{margin-top:24px}
+    .star-picture img{width:100%;filter:grayscale(1) contrast(1.12);mix-blend-mode:multiply;border-block:1px solid var(--ink);padding:8px 0}
+    .star-picture figcaption{font-size:12px;line-height:1.6;color:var(--muted);padding-top:8px}
+    .editors-note{padding:24px 0;border-bottom:3px double var(--ink);display:grid;gap:16px}
+    .editors-note h2{font-size:25px;line-height:1.35}
+    .editors-note p{font-size:15px;line-height:1.8}
+    .editors-note .closing{font-size:21px;line-height:1.55;font-weight:700}
+    .download-link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;width:fit-content;padding:10px 16px;background:var(--ink);color:var(--paper);font-family:Georgia,serif;font-size:14px;text-decoration:none;margin-top:16px}
+    .download-link:hover{background:#4a3c2d}
+    .source-section{padding:24px 0 20px;scroll-margin-top:60px}
+    .source-section>h2{font-size:20px;line-height:1.4;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .source-section>h2 span{font:12px Georgia,serif;letter-spacing:.12em}
+    .source-list{list-style:none;margin:12px 0 0;padding:0}
+    .source-list li{padding:16px 0;border-top:1px solid var(--rule);display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px}
+    .ref-number{font:italic 15px Georgia,serif;padding-top:4px}
+    .source-list a{display:block;font-size:15px;font-weight:750;line-height:1.65;text-decoration:none;min-height:44px;overflow-wrap:anywhere}
+    .source-list a:hover{text-decoration:underline}
+    .source-list small{font-size:12px;color:var(--muted);line-height:1.7;display:block}
+    .colophon{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px 20px;border-top:1px solid var(--ink);padding-top:16px}
+    .colophon p{font-size:12px;line-height:1.7;color:var(--muted);max-width:70ch}
+    .colophon a{font-size:13px;min-height:44px;display:flex;align-items:center;text-decoration:none}
+    .bottom-mark{font-family:Blackletter,Georgia,serif;font-size:28px;text-align:center;margin-top:20px}
+    .toast{position:fixed;bottom:max(20px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:30;background:var(--ink);color:var(--paper);font-family:Georgia,serif;font-size:14px;padding:12px 18px;max-width:90vw;width:max-content;opacity:0;pointer-events:none;transition:opacity .15s ease-out}
+    .toast.show{opacity:1}
+    body.large-type{--body-size:19px}
+    body.large-type .deck{font-size:20px}
+    body.large-type .legal-notes p,body.large-type .ad-body,body.large-type .verb-list li,body.large-type .comparison-block p{font-size:17px}
+    @media(min-width:600px){
+      .toolbar-inner{padding-inline:24px}.toolbar nav{gap:8px}.toolbar nav a{padding-inline:8px;font-size:13px}.print-tool{display:block}
+      .paper{padding:28px 32px}.masthead h1{font-size:84px}.english-mast{font-size:14px}.mast-note{font-size:13px}
+      .source-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.source-list li{grid-template-columns:24px minmax(0,1fr)}
+      .legal-notes{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.legal-notes section+section{border-left:1px solid var(--rule);padding-left:16px}
+      .editors-note{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:32px}.download-link{grid-column:2}
+    }
+    @media(min-width:960px){
+      .toolbar{background:#ded2bb}.paper{margin:28px auto 40px;padding:24px 30px 28px;box-shadow:0 2px 5px #33271924,0 20px 70px #33271916;min-height:auto}
+      .masthead{display:grid;grid-template-columns:170px minmax(0,1fr) 170px;gap:20px;align-items:center;padding:20px 0}
+      .masthead h1{font-size:82px}.mast-side{display:block;border:1px solid var(--ink);padding:12px 10px;font-size:12px;line-height:1.65}
+      .mast-side strong{display:block;font-size:15px;line-height:1.4;margin:4px 0}.mast-side em{font-family:Georgia,serif;font-size:12px}
+      .edition-grid{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1.05fr);gap:24px}
+      .edition-grid>.story{border-bottom:0;padding:28px 0 16px}.edition-grid>.story+.story{border-left:1px solid var(--rule);padding-left:24px}
+      .lead-headline{font-size:44px}.headline{font-size:32px}.story-body{font-size:var(--body-size);line-height:1.78}.deck{font-size:16px}
+      .legal-notes{grid-template-columns:1fr}.legal-notes section+section{border-left:0;padding-left:0}
+      .advert{padding:26px 16px 20px}.ad-title{font-size:42px}.ad-title span{font-size:56px}.ad-subtitle{font-size:17px}.ad-body{font-size:14px}
+      .editors-note{padding-block:28px}
+    }
+    @media(min-width:1200px){.lead-headline{font-size:48px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+    @media print{
+      @page{size:A3 portrait;margin:12mm}
+      html{font-size:10pt;scroll-behavior:auto}body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .toolbar,.skip,.toast,.source-link,.colophon a,.download-link{display:none!important}.paper{max-width:none;min-height:0;margin:0;padding:0;box-shadow:none;overflow:visible}.paper::before{display:none}
+      .masthead{padding:6mm 0 4mm;display:block}.masthead h1{font-size:48pt}.mast-side{display:none}.issue-theme{padding:3mm 0}
+      .edition-grid{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:5mm}.edition-grid>.story{border:0;padding:5mm 0}.edition-grid>.story+.story{border-left:1px solid var(--rule);padding-left:4mm}
+      .headline,.lead-headline{font-size:22pt}.deck{font-size:10pt}.story-body,body.large-type .story-body{font-size:9pt;line-height:1.65}.engraving img{max-height:100mm}.facsimile img{object-fit:cover;object-position:top}
+      .legal-notes{display:block}.legal-notes section{margin-top:3mm}.legal-notes section+section{border:0;padding:0}.fold{display:none}.reading-note{break-inside:avoid}.source-list{display:block}.source-list li{break-inside:avoid}
+      .advert{break-inside:auto}.mini-ad,.fact-box,.quote{break-inside:avoid}.editors-note{display:block}.editors-note h2{margin-bottom:4mm}
+    }
+  </style>
+</head>
+<body>
+<a class="skip" href="#representation">Skip to the edition</a>
+<div class="toolbar" aria-label="Reading tools">
+  <div class="toolbar-inner">
+    <nav aria-label="Edition navigation">
+      <a href="#representation" aria-current="true">Argument</a>
+      <a href="#case-file" aria-current="false">Case file</a>
+      <a href="#method" aria-current="false">Method</a>
+      <a href="#sources" aria-current="false">Sources</a>
+    </nav>
+    <div class="tools">
+      <button id="type-toggle" type="button" aria-label="Increase type size" aria-pressed="false" title="Increase type size">A＋</button>
+      <button class="print-tool" id="print-button" type="button" aria-label="Print the edition or save as PDF">Print ↗</button>
+    </div>
+  </div>
+  <div class="read-progress" aria-hidden="true"></div>
+</div>
+<main class="paper" id="top">
+  <header>
+    <div class="topline"><span>Between Representation and Authentication</span><span>Research edition · Saberes França–Brasil · UFSC</span></div>
+    <div class="masthead">
+      <div class="mast-side"><em>RESEARCHER</em><strong>Ana Vitória Vanzin Mendes</strong>Doctoral researcher in law<br>Federal University of Santa Catarina</div>
+      <div><h1>Iconocracia</h1><div class="english-mast">A JOURNAL OF LAW, IMAGE &amp; AUTHORITY</div><p class="mast-note">READ THE IMAGE. FOLLOW THE DOCUMENT.</p></div>
+      <div class="mast-side"><em>IN THIS EDITION</em><strong>Bust · Blindfold · Coin</strong>Thirteen sections, one argument<br>English lectern script</div>
+    </div>
+    <div class="edition"><span>Research edition · Event reader</span><span>16–17 minute presentation</span><span>13 sections / one argument</span></div>
+    <section class="issue-theme" aria-label="Edition theme"><span>REPRESENTATION ≠ AUTHENTICATION</span><h2>The image lets us see authority.<br>The document helps us understand how it could act.</h2><p>An edited event edition on evidence, institutions, and the legal lives of allegorical figures.</p></section>
+  </header>
+  <div class="edition-grid">
+    <article class="story representation" id="representation" aria-labelledby="representation-title">
+      <div class="section-label"><span class="section-name">Front page · Representation</span><span class="section-number">01</span></div>
+      <h2 class="headline lead-headline" id="representation-title">Between representation and authentication</h2>
+      <p class="deck">A bust, a seal, and a coin may carry the same female figure. Recognition alone does not tell us what the institution does with her.</p>
+      <p class="byline"><span>Ana Vitória Vanzin Mendes</span><span>Edited from sections 01–04 · p. 1–2</span></p>
+      <figure class="engraving facsimile"><div class="image-frame"><img src="assets/script-bust.webp" width="910" height="1287" alt="Facsimile of the first script page, with the title and sections on the Republic bust and a revised provenance claim" fetchpriority="high"></div><figcaption><span>Facsimile of the supplied lectern script, p. 1. The page is reproduced as a source document, not as an image of the bust.</span><span>DOC. 01</span></figcaption></figure>
+      <div class="story-body lead-copy">
+        <p class="drop-cap">I begin with an object from Florianópolis: a bust of the Republic. The museum catalogue gives the figure a name and attributes the work to a foundry. But the photograph cannot tell me who paid for the bust, or how it arrived here. The object can tell me quite a lot; at a certain point, I have to ask a different source.</p>
+        <p>That limit forced a revision. An earlier version of the presentation said that the bust had been bought from a Paris catalogue. The foundry produced works in series, which made the sentence plausible, but plausibility was not provenance. A bill or an inventory could answer a different question: how this particular object entered this particular collection.</p>
+      </div>
+      <aside class="fact-box" aria-label="Evidence ledger"><span class="mini-kicker">AN EVIDENCE LEDGER</span><h3>Different documents answer different questions</h3><ul class="evidence-list"><li><strong>Museum catalogue</strong>Names the figure and attributes the work.</li><li><strong>Sales catalogue</strong>Can establish that a model was offered in series.</li><li><strong>Bill or inventory</strong>May document purchase, arrival, or entry into the collection.</li></ul><p class="footnote">An editorial synthesis of sections 01–02; the underlying catalogues and inventory were not supplied with the script.</p></aside>
+      <h3 class="thin-heading">Recognition is not authentication</h3>
+      <div class="story-body"><p>What does a female figure do when she stands for the authority of the state? Encounter her in a palace, on a seal, or on a coin, and you may recognise the state in each case. What follows from that recognition depends on the object.</p><p>On a bust, recognising the Republic tells me whom the figure represents. On a coin, it does not tell me whether the coin is genuine. With a seal, I still need to know who may use it and under what rule. These small differences change what counts as an answer.</p><p>France and Brazil can be connected through an artist’s training, a book or model, or the documented journey of an object. These are different lines of inquiry. A resemblance gives me a reason to start looking; it does not establish which route a particular image took.</p></div>
+      <details class="fold"><summary>Why the staircase still matters</summary><div><p>The bust appears in the company of other figures, inviting a reading of the whole arrangement. That arrangement still cannot tell me whether the pieces were bought together, or whether the people who placed them there understood it as viewers do now.</p><p>Returning to the staircase at the end of the argument makes the methodological point visible again: each image belongs to a history of authority, and reconstructing the institution that used it requires another kind of evidence.</p></div></details>
+      <blockquote class="quote"><p>“A resemblance is a good reason to start looking. It doesn’t tell me which route a particular image took.”</p><cite>Lectern script, section 04/13 · p. 2</cite></blockquote>
+      <a class="source-link" href="downloads/between-representation-authentication.pdf#page=1" target="_blank" rel="noopener"><span>Read sections 01–04 in the original script</span><span aria-hidden="true">↗</span></a>
+    </article>
+    <article class="story case-file" id="case-file" aria-labelledby="case-title">
+      <div class="section-label"><span class="section-name">Case file · Law &amp; numismatics</span><span class="section-number">02</span></div>
+      <h2 class="headline" id="case-title">What does the gold guarantee?</h2>
+      <p class="deck">The legal question begins where visual comparison ends: under what authority was the object made?</p>
+      <p class="byline"><span>Case study by Ana Vitória Vanzin Mendes</span><span>Sections 09–11 · p. 5–6</span></p>
+      <figure class="engraving facsimile"><div class="image-frame"><img src="assets/script-coin.webp" width="910" height="1287" alt="Facsimile of script page five, discussing French gold coins, Decree No. 1,227, and Article 239 of the 1890 Penal Code" loading="eager"></div><figcaption><span>Sections 09–10 of the supplied script, p. 5. Legal references are presented as framed there.</span><span>DOC. 02</span></figcaption></figure>
+      <div class="story-body lead-copy"><p class="drop-cap">At the end of 1890, bank statutes annexed to Brazilian Decree No. 1,227 listed French ten- and twenty-franc coins among the kinds of gold that could make up the deposit securing the issue of banknotes.</p><p>The important word is <strong>securing</strong>. The provision tells me what those coins could be used for in that arrangement. It does not establish that French coins were general legal tender in Brazil, nor that they circulated in everyday trade.</p></div>
+      <div class="benchmark"><strong>1890</strong><p>Decree No. 1,227<br>Bank statutes and the deposit securing banknote issue</p></div>
+      <p class="footnote">This edition reports the argument of the lectern script; it does not independently reproduce or certify the decree’s text.</p>
+      <h3 class="thin-heading">The perfect copy</h3>
+      <div class="story-body"><p>Imagine two coins matching in material, form, weight, and intrinsic value. You might be unable to tell them apart. Article 239 of the Brazilian Penal Code of 1890 addresses the manufacture of a coin matching a genuine one in precisely those respects.</p><p>Then the decisive words arrive: <strong>“sem autoridade legitima”</strong> — without lawful authority. If the coin was made without that authority, matching the genuine object did not keep its manufacture from being punishable.</p></div>
+      <div class="legal-notes"><section><h3><span>I.</span>Material match</h3><p>Material, form, weight, and intrinsic value matter to the provision’s description of the object.</p></section><section><h3><span>II.</span>Legal condition</h3><p>Examining the object alone cannot establish whether its maker had lawful authority.</p></section><section><h3><span>III.</span>Different evidence</h3><p>Legal tender calls for a rule about payments; everyday circulation calls for evidence of transactions.</p></section></div>
+      <details class="fold"><summary>What would count as a different finding?</summary><div><p>A finding about general legal tender would require a rule governing payments. A finding about actual circulation would require evidence of transactions. The script asks first what this particular rule allowed, and in what institutional setting, before extending the claim beyond it.</p><p>The same discipline applies to the Republic bust: visible form may be recognisable, while the authority to produce or use an object depends on an institutional history that the image alone cannot supply.</p></div></details>
+      <blockquote class="quote"><p>“Matching the genuine object didn’t keep the manufacture from being punishable.”</p><cite>Lectern script, section 10/13 · p. 5</cite></blockquote>
+      <p class="reading-note">This is a methodological case study, not legal advice. The edition preserves the source’s distinction between resemblance, authority, and legal effect.</p>
+      <a class="source-link" href="downloads/between-representation-authentication.pdf#page=5" target="_blank" rel="noopener"><span>Read sections 09–11 in the original script</span><span aria-hidden="true">↗</span></a>
+    </article>
+    <article class="story method" id="method" aria-labelledby="method-title">
+      <div class="section-label"><span class="section-name">Method · Marginalia</span><span class="section-number">03</span></div>
+      <div class="advert">
+        <p class="ad-eyebrow">A WORKING VOCABULARY</p>
+        <h2 class="ad-title" id="method-title">FOUR<span>VERBS</span></h2>
+        <div class="ad-rule"></div>
+        <h3 class="ad-subtitle">Keep the image’s operations distinct</h3>
+        <p class="ad-body">The script uses four verbs to keep its bearings. They can overlap in practice, but they do not answer the same question.</p>
+        <ol class="verb-list">
+          <li><strong>Represent</strong>Give a community or an office a recognisable form.</li>
+          <li><strong>Legitimate</strong>Make an authority appear deserving of consent.</li>
+          <li><strong>Authenticate</strong>Establish that something is genuine by a recognised procedure or criterion.</li>
+          <li><strong>Justify</strong>Give reasons why a rule or decision can be defended.</li>
+        </ol>
+        <p class="ad-body">The argument’s main distance is between the first verb and the third. Familiarity may explain an image’s public power; institutional use tells me what it does legally.</p>
+        <p class="ad-byline">Edited from section 05/13 · p. 3</p>
+        <a class="source-link" href="downloads/between-representation-authentication.pdf#page=3" target="_blank" rel="noopener"><span>Read the four verbs in context</span><span aria-hidden="true">↗</span></a>
+      </div>
+      <section class="mini-ad" aria-labelledby="comparison-title"><span class="mini-kicker">COMPARISON AS A QUESTION</span><h3 id="comparison-title">Change the scene,<br>change the inquiry</h3>
+        <div class="comparison-block"><h4>The blindfold</h4><p>In Brant’s <em>Ship of Fools</em>, a fool is putting the blindfold on Justice. At the fountain in Bern, Justice is already blindfolded when I encounter her as a civic figure. In Ripa, it belongs to a repertoire of attributes.</p><p>The comparison does not propose one history for every blindfold. It produces a question to take back to each case.</p></div>
+        <div class="comparison-block"><h4>Debret: two dates</h4><p>In 1822, the design for Pedro I’s coronation theatre curtain belongs to a political occasion. In 1839, a printed plate brings the scene to different readers.</p><p>The constitutional tablets appear in the coronation scene, while the Charter dates to 1824. That gap lets me ask what the image was doing; it does not, by itself, explain how the order acquired legal force.</p></div>
+        <div class="comparison-block"><h4>The figure and the people</h4><p>A female figure’s central place in an official image says little, by itself, about the legal position of women living under that authority.</p><p>Civil capacity, voting, and entry into a profession have distinct institutional histories. The script follows both histories without assuming that they coincide.</p></div>
+      </section>
+      <figure class="star-picture"><img src="assets/script-verbs.webp" width="910" height="1287" loading="eager" alt="Facsimile of script page three, presenting the four verbs and comparing the blindfold of Justice across three visual settings"><figcaption>Facsimile of the supplied script, p. 3 · sections 05–06. Reproduced as documentary evidence of the argument.</figcaption></figure>
+      <details class="fold"><summary>What might change my mind?</summary><div><p>A document requiring this particular figure as a condition for recognising an act as valid would give the image a more precise legal role. The same use with different figures would raise a further question: is the figure’s gender decisive in that setting?</p><p>The absence of a discovered bill is not proof that no bill existed. Comparison helps identify what evidence to seek and what the researcher would be ready to revise.</p></div></details>
+      <p class="reading-note">Similarity is not transmission. A montage can open an investigation; inventories, bills, legal texts, and institutional rules carry different evidentiary burdens.</p>
+      <a class="source-link" href="downloads/between-representation-authentication.pdf#page=3" target="_blank" rel="noopener"><span>Read sections 05–08 and 12</span><span aria-hidden="true">↗</span></a>
+    </article>
+  </div>
+  <aside class="editors-note" aria-labelledby="editors-title">
+    <div><span class="mini-kicker">CLOSING · SECTION 13/13</span><h2 id="editors-title">“So when an image enters a palace, a seal or a coin, what does the institution do with it?”</h2></div>
+    <div><p class="closing">The bust separates the place of manufacture from the history of purchase. The coin separates resemblance from the authority to make it.</p><p>In both cases, looking more closely at the object sends the researcher to a different source. That is where this edition leaves the argument: between the visible form of authority and the documents that help me understand how it could act.</p><p class="footnote">Editorial disclosure: this is an independently designed reading edition of the supplied English lectern script, not an official newspaper or an independent verification of its historical and legal references. Headlines and transitions are edited; direct quotations retain quotation marks. No image of the discussed bust was supplied, so the edition uses only script facsimiles.</p></div>
+    <a class="download-link" href="downloads/between-representation-authentication.pdf" download>Download the original script · PDF ↓</a>
+  </aside>
+  <footer>
+    <section class="source-section" id="sources" aria-labelledby="sources-title">
+      <h2 id="sources-title">Source &amp; reading map <span>SOURCES &amp; CREDITS</span></h2>
+      <ol class="source-list">
+        <li><span class="ref-number">01</span><div><a href="downloads/between-representation-authentication.pdf" target="_blank" rel="noopener">Between Representation and Authentication ↗</a><small>MENDES, Ana Vitória Vanzin. <em>Between Representation and Authentication</em>. [S. l.: s. n., s. d.]. 8 p. Lectern script in English.<br>Complete source supplied for this edition.</small></div></li>
+        <li><span class="ref-number">02</span><div><a href="downloads/between-representation-authentication.pdf#page=1" target="_blank" rel="noopener">Bust, allegory, blindfold, and Debret ↗</a><small>Sections 01–08 · p. 1–4.<br>Source for the front-page argument and method notes.</small></div></li>
+        <li><span class="ref-number">03</span><div><a href="downloads/between-representation-authentication.pdf#page=5" target="_blank" rel="noopener">Gold, lawful authority, and revision ↗</a><small>Sections 09–13 · p. 5–7; language notes at p. 8.<br>Source for the legal case file and closing.</small></div></li>
+      </ol>
+    </section>
+    <div class="colophon"><p>Research and authorship: Ana Vitória Vanzin Mendes · Editorial adaptation of the supplied script<br>Facsimiles and source PDF reproduced from the user-supplied document · No analytics, forms, or personal-data collection</p><a href="#top" aria-label="Back to the top of the paper">Back to the masthead ↑</a></div>
+    <div class="bottom-mark" aria-hidden="true">Iconocracia</div>
+  </footer>
+</main>
+<div class="toast" role="status" aria-live="polite"></div>
+<script>
+  (()=>{
+    const toggle=document.getElementById('type-toggle');
+    const toast=document.querySelector('.toast');
+    let timer;
+    toggle.addEventListener('click',()=>{
+      const large=document.body.classList.toggle('large-type');
+      toggle.setAttribute('aria-pressed',String(large));
+      toggle.setAttribute('aria-label',large?'Restore standard type':'Increase type size');
+      toggle.textContent=large?'A−':'A＋';
+      toast.textContent=large?'Type size increased':'Standard type restored';
+      toast.classList.add('show');
+      clearTimeout(timer);
+      timer=setTimeout(()=>toast.classList.remove('show'),1800);
+    });
+    document.getElementById('print-button').addEventListener('click',()=>window.print());
+    const sections=[...document.querySelectorAll('#representation,#case-file,#method,#sources')];
+    const links=[...document.querySelectorAll('.toolbar nav a')];
+    const progress=document.querySelector('.read-progress');
+    let queued=false;
+    let preferred=sections[0];
+    function update(){
+      queued=false;
+      const max=document.documentElement.scrollHeight-innerHeight;
+      progress.style.width=(max>0?Math.min(100,scrollY/max*100):0)+'%';
+      let active=sections[0];
+      if(matchMedia('(min-width:960px)').matches){
+        active=sections[3].getBoundingClientRect().top<=innerHeight*.3?sections[3]:preferred;
+      }else{
+        for(const section of sections){if(section.getBoundingClientRect().top<=innerHeight*.3)active=section;}
+      }
+      if(max>0&&scrollY>=max-2)active=sections[3];
+      links.forEach(link=>link.setAttribute('aria-current',String(link.hash==='#'+active.id)));
+    }
+    function schedule(){if(!queued){queued=true;requestAnimationFrame(update);}}
+    addEventListener('scroll',schedule,{passive:true});
+    addEventListener('resize',schedule);
+    document.fonts.ready.then(schedule);
+    new ResizeObserver(schedule).observe(document.body);
+    links.forEach(link=>link.addEventListener('click',()=>{
+      if(link.hash!=='#sources')preferred=sections.find(section=>'#'+section.id===link.hash);
+      links.forEach(other=>other.setAttribute('aria-current',String(other===link)));
+    }));
+    update();
+  })();
+</script>
+</body>
+</html>

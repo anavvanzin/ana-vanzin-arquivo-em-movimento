@@ -58,7 +58,9 @@ export class FirestoreErrorBoundary extends React.Component<
       return this.props.children;
     }
 
-    const upgradeUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore/databases/${firebaseConfig.firestoreDatabaseId}/data?openUpgradeDialog=true`;
+    const dbId =
+      (firebaseConfig as { firestoreDatabaseId?: string }).firestoreDatabaseId || '(default)';
+    const upgradeUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore/databases/${dbId}/data?openUpgradeDialog=true`;
 
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-[#f2efeb] text-[#1c1c1c]">

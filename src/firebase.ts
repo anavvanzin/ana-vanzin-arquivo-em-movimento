@@ -3,7 +3,6 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, User } from 'firebase/aut
 import {
   doc,
   getDoc,
-  getDocFromServer,
   getFirestore,
   serverTimestamp,
   setDoc,
@@ -12,7 +11,8 @@ import firebaseConfig from '../firebase-applet-config.json';
 import { DeckId, LangCode } from './types';
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+const databaseId = (firebaseConfig as { firestoreDatabaseId?: string }).firestoreDatabaseId;
+export const db = databaseId ? getFirestore(app, databaseId) : getFirestore(app);
 export const auth = getAuth(app);
 
 const basicGoogleProvider = new GoogleAuthProvider();
@@ -48,8 +48,9 @@ export function handleFirestoreError(
   operationType: OperationType,
   path: string | null
 ): never {
+  const errStr = error instanceof Error ? error.message : String(error);
   const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
+    error: errStr,
     authInfo: {
       userId: auth.currentUser?.uid,
       email: auth.currentUser?.email,
@@ -69,18 +70,6 @@ export function handleFirestoreError(
   throw new Error(JSON.stringify(errInfo));
 }
 
-async function testConnection() {
-  try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error('Please check your Firebase configuration.');
-    }
-  }
-}
-
-void testConnection();
-
 export const WORKSPACE_CONSTRAINTS = {
   ID_REGEX: /^[a-zA-Z0-9_-]+$/,
   MAX_ID_LEN: 128,
@@ -94,6 +83,9 @@ export const WORKSPACE_CONSTRAINTS = {
   MAX_QUERY_TITLE_LEN: 300,
   MAX_SYNTHESIS_LEN: 8000,
   MAX_SOURCES_SUMMARY_LEN: 3000,
+  MAX_ATELIER_TITLE_LEN: 240,
+  MAX_ATELIER_PROMPT_LEN: 2000,
+  MAX_ATELIER_SPEC_LEN: 240,
 } as const;
 
 export function sanitizeBoundedString(val: string | undefined, maxLen: number): string {
@@ -106,9 +98,18 @@ export function makeFirestoreRevisionId(deck: DeckId, lang: LangCode, slideIndex
   return `${deck}_${lang}_${String(safeIdx).padStart(2, '0')}`;
 }
 
-export async function signInWithFirebaseGoogle(): Promise<User> {
-  const result = await signInWithPopup(auth, basicGoogleProvider);
-  return result.user;
+export async function signInWithFirebaseGoogle(): Promise<User | null> {
+  try {
+    const result = await signInWithPopup(auth, basicGoogleProvider);
+    return result.user;
+  } catch (error: unknown) {
+    const code = (error as { code?: string })?.code;
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      return null;
+    }
+    console.warn('Autenticação Google cancelada ou interrompida:', error);
+    return null;
+  }
 }
 
 export async function ensureUserWorkspaceDocument(
@@ -126,8 +127,14 @@ export async function ensureUserWorkspaceDocument(
   try {
     const snap = await getDoc(userRef);
     exists = snap.exists();
-  } catch (error) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg.includes('offline') || msg.includes('unavailable') || msg.includes('network')) {
+      console.warn('Firestore offline:', msg);
+      return false;
+    }
     handleFirestoreError(error, OperationType.GET, path);
+    return false;
   }
 
   if (exists) {
@@ -154,7 +161,13 @@ export async function ensureUserWorkspaceDocument(
       updatedAt: serverTimestamp(),
     });
     return true;
-  } catch (error) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg.includes('offline') || msg.includes('unavailable') || msg.includes('network')) {
+      console.warn('Firestore offline ao criar workspace:', msg);
+      return false;
+    }
     handleFirestoreError(error, OperationType.CREATE, path);
+    return false;
   }
 }

@@ -47,6 +47,12 @@ service cloud.firestore {
       );
     }
 
+    function isValidAxis(val) {
+      return val is string && val.size() <= 16 && (
+        val == 'venda' || val == 'imperio' || val == 'republica'
+      );
+    }
+
     function isOptionalBoundedString(data, key, maxLen) {
       return !(key in data) || (data[key] is string && data[key].size() <= maxLen);
     }
@@ -186,6 +192,54 @@ service cloud.firestore {
         data.sourcesSummary is string &&
         data.sourcesSummary.size() <= 3000 &&
         isValidDeck(data.deck) &&
+        data.status is string &&
+        data.status.size() <= 16 &&
+        (data.status == 'active' || data.status == 'archived') &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidAtelierRecord(data, userId) {
+      return data.keys().hasAll([
+          'ownerId',
+          'kind',
+          'title',
+          'promptOrSummary',
+          'axis',
+          'specSummary',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'ownerId',
+          'kind',
+          'title',
+          'promptOrSummary',
+          'axis',
+          'specSummary',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.ownerId is string &&
+        data.ownerId.size() >= 1 &&
+        data.ownerId.size() <= 128 &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.ownerId == userId &&
+        data.kind is string &&
+        data.kind.size() <= 20 &&
+        (data.kind == 'image_plate' || data.kind == 'spatial_view') &&
+        data.title is string &&
+        data.title.size() >= 1 &&
+        data.title.size() <= 240 &&
+        data.promptOrSummary is string &&
+        data.promptOrSummary.size() >= 1 &&
+        data.promptOrSummary.size() <= 2000 &&
+        isValidAxis(data.axis) &&
+        data.specSummary is string &&
+        data.specSummary.size() <= 240 &&
         data.status is string &&
         data.status.size() <= 16 &&
         (data.status == 'active' || data.status == 'archived') &&
@@ -340,6 +394,60 @@ service cloud.firestore {
           isOwner(userId) &&
           isValidId(userId) &&
           isValidId(noteId) &&
+          existing().status != 'archived' &&
+          existing().ownerId == request.auth.uid &&
+          hasActiveWorkspace(userId);
+      }
+
+      // 7. Subcollection: /users/{userId}/atelierRecords/{recordId}
+      match /atelierRecords/{recordId} {
+        allow get: if isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(recordId) &&
+          (resource == null || existing().ownerId == request.auth.uid) &&
+          hasActiveWorkspace(userId);
+
+        allow list: if isOwner(userId) &&
+          existing().ownerId == request.auth.uid;
+
+        allow create: if isVerifiedUser() &&
+          isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(recordId) &&
+          isValidAtelierRecord(incoming(), userId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          hasActiveWorkspace(userId);
+
+        allow update: if isVerifiedUser() &&
+          isValidAtelierRecord(incoming(), userId) &&
+          isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(recordId) &&
+          existing().status != 'archived' &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().kind == existing().kind &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          hasActiveWorkspace(userId) && (
+            // Action 1: Update curatorial metadata or axis
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'title',
+              'promptOrSummary',
+              'axis',
+              'specSummary',
+              'status',
+              'updatedAt'
+            ]) ||
+            // Action 2: Archive record (terminal transition)
+            (incoming().status == 'archived' &&
+              incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
+          );
+
+        allow delete: if isVerifiedUser() &&
+          isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(recordId) &&
           existing().status != 'archived' &&
           existing().ownerId == request.auth.uid &&
           hasActiveWorkspace(userId);

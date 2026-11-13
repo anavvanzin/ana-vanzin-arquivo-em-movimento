@@ -26,6 +26,7 @@ import {
   WORKSPACE_CONSTRAINTS,
 } from '../firebase';
 import {
+  AtlasAxis,
   CanonicalBundle,
   DeckId,
   LangCode,
@@ -47,6 +48,17 @@ export interface SavedResearchNote {
   synthesis: string;
   sourcesSummary: string;
   deck: DeckId;
+  status: 'active' | 'archived';
+  updatedAtIso: string;
+}
+
+export interface SavedAtelierRecord {
+  id: string;
+  kind: 'image_plate' | 'spatial_view';
+  title: string;
+  promptOrSummary: string;
+  axis: AtlasAxis;
+  specSummary: string;
   status: 'active' | 'archived';
   updatedAtIso: string;
 }
@@ -166,6 +178,7 @@ export function useArchiveStore() {
   const [isAuthReady, setIsAuthReady] = useState<boolean>(false);
   const [workspaceReady, setWorkspaceReady] = useState<boolean>(false);
   const [savedResearchNotes, setSavedResearchNotes] = useState<SavedResearchNote[]>([]);
+  const [savedAtelierRecords, setSavedAtelierRecords] = useState<SavedAtelierRecord[]>([]);
 
   const existingRevisionIdsRef = useRef<Set<string>>(new Set());
   const debounceTimersRef = useRef<Record<string, number>>({});
@@ -194,20 +207,28 @@ export function useArchiveStore() {
           const ok = await ensureUserWorkspaceDocument(user, 'representacao', 'pt');
           setWorkspaceReady(ok);
         } catch (err) {
-          console.error('Failed to bootstrap Firestore workspace:', err);
+          console.warn('Sincronização Firestore temporariamente indisponível ou offline:', err);
           setWorkspaceReady(false);
         }
       } else {
         setWorkspaceReady(false);
         existingRevisionIdsRef.current.clear();
         setSavedResearchNotes([]);
+        setSavedAtelierRecords([]);
       }
     });
     return () => unsubscribe();
   }, []);
 
   const getCanonicalSlides = useCallback((deck: DeckId, lang: LangCode): SlideItem[] => {
-    return canonicalBundle.decks[deck][lang] || canonicalBundle.decks[deck].pt;
+    const raw = canonicalBundle.decks[deck][lang] || canonicalBundle.decks[deck].pt;
+    if (deck === 'representacao') {
+      return raw.map((s, idx) => ({
+        ...s,
+        slideImage: s.slideImage || `/slides/slide-${String(idx + 1).padStart(2, '0')}.png`,
+      }));
+    }
+    return raw;
   }, []);
 
   // 2. Real-Time Firestore Listeners (Only attached when Auth + Workspace are ready)
@@ -291,9 +312,49 @@ export function useArchiveStore() {
       }
     );
 
+    const atelierPath = `users/${uid}/atelierRecords`;
+    const atelierQuery = query(
+      collection(db, 'users', uid, 'atelierRecords'),
+      where('ownerId', '==', uid)
+    );
+
+    const unsubAtelier = onSnapshot(
+      atelierQuery,
+      (snapshot) => {
+        const loaded: SavedAtelierRecord[] = [];
+        snapshot.forEach((docSnap) => {
+          const d = docSnap.data() as Record<string, unknown>;
+          const updatedAtIso =
+            d.updatedAt instanceof Timestamp
+              ? d.updatedAt.toDate().toISOString()
+              : new Date().toISOString();
+          const rawAxis = d.axis;
+          const axis: AtlasAxis =
+            rawAxis === 'imperio' || rawAxis === 'republica' ? rawAxis : 'venda';
+          loaded.push({
+            id: docSnap.id,
+            kind: d.kind === 'spatial_view' ? 'spatial_view' : 'image_plate',
+            title: typeof d.title === 'string' ? d.title : '',
+            promptOrSummary:
+              typeof d.promptOrSummary === 'string' ? d.promptOrSummary : '',
+            axis,
+            specSummary: typeof d.specSummary === 'string' ? d.specSummary : '',
+            status: d.status === 'archived' ? 'archived' : 'active',
+            updatedAtIso,
+          });
+        });
+        loaded.sort((a, b) => b.updatedAtIso.localeCompare(a.updatedAtIso));
+        setSavedAtelierRecords(loaded);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, atelierPath);
+      }
+    );
+
     return () => {
       unsubRevisions();
       unsubNotes();
+      unsubAtelier();
     };
   }, [firebaseUser, getCanonicalSlides, isAuthReady, workspaceReady]);
 
@@ -356,12 +417,20 @@ export function useArchiveStore() {
       const base = getCanonicalSlides(deck, lang);
       return base.map((slide, idx) => {
         const ov = overrides[makeSlideKey(deck, lang, idx)];
-        if (!ov) return slide;
+        const defaultImage =
+          deck === 'representacao' ? `/slides/slide-${String(idx + 1).padStart(2, '0')}.png` : undefined;
+        if (!ov) {
+          return {
+            ...slide,
+            slideImage: slide.slideImage || defaultImage,
+          };
+        }
         return {
           ...slide,
           title: ov.title !== undefined ? ov.title : slide.title,
           blocks: ov.blocks !== undefined ? ov.blocks : slide.blocks,
           footer: ov.footer !== undefined ? ov.footer : slide.footer,
+          slideImage: slide.slideImage || defaultImage,
         };
       });
     },
@@ -562,11 +631,84 @@ export function useArchiveStore() {
     [firebaseUser, workspaceReady]
   );
 
-  const signInCloudSync = useCallback(async (): Promise<User> => {
+  // Firestore AtelierRecord Actions (/users/{uid}/atelierRecords/{recordId})
+  const saveAtelierRecordToFirestore = useCallback(
+    async (input: {
+      kind: 'image_plate' | 'spatial_view';
+      title: string;
+      promptOrSummary: string;
+      axis: AtlasAxis;
+      specSummary: string;
+    }): Promise<string> => {
+      if (!firebaseUser || !workspaceReady || !firebaseUser.emailVerified) {
+        throw new Error(
+          'Conecte sua conta Google verificada para salvar registros do atelier no Firestore.'
+        );
+      }
+      const uid = firebaseUser.uid;
+      const prefix = input.kind === 'spatial_view' ? 'spatial' : 'plate';
+      const recordId = `${prefix}_${Date.now()}`;
+      const docPath = `users/${uid}/atelierRecords/${recordId}`;
+
+      const boundedTitle =
+        sanitizeBoundedString(input.title.trim(), WORKSPACE_CONSTRAINTS.MAX_ATELIER_TITLE_LEN) ||
+        'Registro curatorial';
+      const boundedPrompt =
+        sanitizeBoundedString(
+          input.promptOrSummary.trim(),
+          WORKSPACE_CONSTRAINTS.MAX_ATELIER_PROMPT_LEN
+        ) || 'Sem descrição.';
+      const boundedSpec = sanitizeBoundedString(
+        input.specSummary.trim(),
+        WORKSPACE_CONSTRAINTS.MAX_ATELIER_SPEC_LEN
+      );
+      const validAxis: AtlasAxis =
+        input.axis === 'imperio' || input.axis === 'republica' ? input.axis : 'venda';
+
+      try {
+        await setDoc(doc(db, 'users', uid, 'atelierRecords', recordId), {
+          ownerId: uid,
+          kind: input.kind === 'spatial_view' ? 'spatial_view' : 'image_plate',
+          title: boundedTitle,
+          promptOrSummary: boundedPrompt,
+          axis: validAxis,
+          specSummary: boundedSpec,
+          status: 'active',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+        return recordId;
+      } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, docPath);
+      }
+    },
+    [firebaseUser, workspaceReady]
+  );
+
+  const deleteAtelierRecordFromFirestore = useCallback(
+    async (recordId: string): Promise<void> => {
+      if (!firebaseUser || !workspaceReady || !WORKSPACE_CONSTRAINTS.ID_REGEX.test(recordId))
+        return;
+      const uid = firebaseUser.uid;
+      const docPath = `users/${uid}/atelierRecords/${recordId}`;
+      try {
+        await deleteDoc(doc(db, 'users', uid, 'atelierRecords', recordId));
+      } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, docPath);
+      }
+    },
+    [firebaseUser, workspaceReady]
+  );
+
+  const signInCloudSync = useCallback(async (): Promise<User | null> => {
     const user = await signInWithFirebaseGoogle();
-    if (user.emailVerified) {
-      const ok = await ensureUserWorkspaceDocument(user, 'representacao', 'pt');
-      setWorkspaceReady(ok);
+    if (user && user.emailVerified) {
+      try {
+        const ok = await ensureUserWorkspaceDocument(user, 'representacao', 'pt');
+        setWorkspaceReady(ok);
+      } catch (err) {
+        console.warn('Workspace sync indisponível temporariamente:', err);
+      }
     }
     return user;
   }, []);
@@ -699,10 +841,13 @@ export function useArchiveStore() {
     isAuthReady,
     cloudSyncActive: Boolean(firebaseUser && workspaceReady && firebaseUser.emailVerified),
     savedResearchNotes,
+    savedAtelierRecords,
     signInCloudSync,
     signOutCloudSync,
     saveResearchNoteToFirestore,
     deleteResearchNoteFromFirestore,
+    saveAtelierRecordToFirestore,
+    deleteAtelierRecordFromFirestore,
     getCanonicalSlides,
     getMergedSlides,
     getSlideOverride,

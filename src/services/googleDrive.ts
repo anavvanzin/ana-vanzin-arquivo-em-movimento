@@ -21,6 +21,12 @@ export const SCOPES = [
   'https://www.googleapis.com/auth/drive.photos.readonly',
   'https://www.googleapis.com/auth/drive.readonly',
   'https://www.googleapis.com/auth/drive.scripts',
+  'https://www.googleapis.com/auth/presentations',
+  'https://www.googleapis.com/auth/presentations.readonly',
+  'https://www.googleapis.com/auth/spreadsheets',
+  'https://www.googleapis.com/auth/spreadsheets.readonly',
+  'https://www.googleapis.com/auth/documents',
+  'https://www.googleapis.com/auth/documents.readonly',
 ];
 
 const provider = new GoogleAuthProvider();
@@ -94,7 +100,12 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
     cachedAccessToken = credential.accessToken;
     notifyListeners();
     return { user: result.user, accessToken: cachedAccessToken };
-  } catch (error) {
+  } catch (error: unknown) {
+    const code = (error as { code?: string })?.code;
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      // User closed the popup window deliberately - not an error
+      return null;
+    }
     console.error('Sign in error:', error);
     throw error;
   } finally {
@@ -138,7 +149,7 @@ export interface DriveActivityEntry {
   actorName?: string;
 }
 
-export type DriveFilterCategory = 'all' | 'json' | 'docs' | 'images' | 'folders';
+export type DriveFilterCategory = 'all' | 'slides' | 'docs' | 'json' | 'images' | 'folders';
 
 export class DriveAuthRequiredError extends Error {
   constructor(message = 'Autenticação com Google necessária para acessar o Google Drive.') {
@@ -147,7 +158,7 @@ export class DriveAuthRequiredError extends Error {
   }
 }
 
-async function driveFetch(url: string, init?: RequestInit): Promise<Response> {
+export async function driveFetch(url: string, init?: RequestInit): Promise<Response> {
   const token = await getAccessToken();
   if (!token) {
     throw new DriveAuthRequiredError();
@@ -203,6 +214,11 @@ export async function listDriveFiles(options: {
   }
 
   switch (options.category) {
+    case 'slides':
+      clauses.push(
+        `(mimeType = 'application/vnd.google-apps.presentation' or mimeType = 'application/vnd.ms-powerpoint' or mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation')`
+      );
+      break;
     case 'json':
       clauses.push(`(mimeType = 'application/json' or name contains '.json')`);
       break;

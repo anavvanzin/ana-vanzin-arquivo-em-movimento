@@ -227,6 +227,73 @@
         "createdAt",
         "updatedAt"
       ]
+    },
+    "AtelierRecord": {
+      "title": "AtelierRecord",
+      "description": "Metadata record for a researcher's generated/edited iconographic study plate (gemini-nano-banana-2.1) or 3D spatial cabinet inspection bookmark (never stores raw image bytes).",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the record owner."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["image_plate", "spatial_view"],
+          "description": "Distinguishes an image study plate metadata entry from a 3D spatial cabinet view bookmark."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240,
+          "description": "Curatorial title of the study plate or 3D inspection view."
+        },
+        "promptOrSummary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "description": "Generation/editing prompt or 3D spatial analytical observation."
+        },
+        "axis": {
+          "type": "string",
+          "enum": ["venda", "imperio", "republica"],
+          "description": "Thematic iconographic axis (1494-1603 blindfold, 1822-1839 empire, or 1890-1906 republic)."
+        },
+        "specSummary": {
+          "type": "string",
+          "maxLength": 240,
+          "description": "Compact technical parameters (e.g., '4:3 · 1K · edit' or 'allegory · exploded 65% · bronze')."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "archived"],
+          "description": "Lifecycle state; archived is terminal."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last-modified timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "kind",
+        "title",
+        "promptOrSummary",
+        "axis",
+        "specSummary",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
     }
   },
   "firestore": {
@@ -241,6 +308,10 @@
     "/users/{userId}/researchNotes/{noteId}": {
       "schema": { "$ref": "#/entities/ResearchNote" },
       "description": "Saved documentary verification fichas grounded in archival search, owned by userId."
+    },
+    "/users/{userId}/atelierRecords/{recordId}": {
+      "schema": { "$ref": "#/entities/AtelierRecord" },
+      "description": "Metadata log of generated/edited iconographic study plates and 3D spatial inspection bookmarks owned by userId."
     }
   }
 }

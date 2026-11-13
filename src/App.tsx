@@ -5,10 +5,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { User } from 'firebase/auth';
-import { CheckCircle2, Cloud, Database, LogOut, Menu, X } from 'lucide-react';
-import { AtlasGallery } from './components/AtlasGallery';
+import { CheckCircle2, Cloud, Database, FileText, LogOut, Menu, Presentation, X } from 'lucide-react';
+import { AtlasGallery, AtlasSectionTab } from './components/AtlasGallery';
+import { Cabinet3DScene } from './components/Cabinet3DScene';
 import { DriveWorkspace } from './components/DriveWorkspace';
 import { EditorialApparatus } from './components/EditorialApparatus';
+import { GoogleDocsWorkspace } from './components/GoogleDocsWorkspace';
+import { GoogleSlidesWorkspace } from './components/GoogleSlidesWorkspace';
 import { HomePortal } from './components/HomePortal';
 import { LightboxModal } from './components/LightboxModal';
 import { PresenterStage } from './components/PresenterStage';
@@ -33,6 +36,9 @@ interface RouteState {
   deck: DeckId;
   lang: LangCode;
   slideIndex: number;
+  atlasSection?: AtlasSectionTab;
+  googleSlidesId?: string | null;
+  googleDocId?: string | null;
 }
 
 const VALID_LANGS: LangCode[] = ['pt', 'en', 'fr', 'it', 'nl'];
@@ -44,12 +50,43 @@ function parseRouteFromLocation(): RouteState {
 
   if (hash.startsWith('/')) {
     const parts = hash.split('/').filter(Boolean);
+    if (parts[0] === 'gabinete-3d') {
+      const l = VALID_LANGS.includes(parts[1] as LangCode) ? (parts[1] as LangCode) : 'pt';
+      return { view: 'cabinet3d', deck: 'representacao', lang: l, slideIndex: 0 };
+    }
     if (parts[0] === 'atlas') {
-      return { view: 'atlas', deck: 'representacao', lang: 'pt', slideIndex: 0 };
+      const sec: AtlasSectionTab = parts[1] === 'atelier' ? 'atelier' : 'catalog';
+      return {
+        view: 'atlas',
+        deck: 'representacao',
+        lang: 'pt',
+        slideIndex: 0,
+        atlasSection: sec,
+      };
     }
     if (parts[0] === 'drive') {
       const l = VALID_LANGS.includes(parts[1] as LangCode) ? (parts[1] as LangCode) : 'pt';
       return { view: 'drive', deck: 'representacao', lang: l, slideIndex: 0 };
+    }
+    if (parts[0] === 'slides') {
+      const presId = parts[1] || null;
+      return {
+        view: 'slides',
+        deck: 'representacao',
+        lang: 'pt',
+        slideIndex: 0,
+        googleSlidesId: presId,
+      };
+    }
+    if (parts[0] === 'docs') {
+      const docId = parts[1] || null;
+      return {
+        view: 'docs',
+        deck: 'representacao',
+        lang: 'pt',
+        slideIndex: 0,
+        googleDocId: docId,
+      };
     }
     if (parts[0] === 'studio') {
       const d = VALID_DECKS.includes(parts[1] as DeckId) ? (parts[1] as DeckId) : 'representacao';
@@ -100,11 +137,17 @@ function buildHashUrl(state: RouteState): string {
     case 'home':
       return '#/';
     case 'atlas':
-      return '#/atlas';
+      return state.atlasSection === 'atelier' ? '#/atlas/atelier' : '#/atlas';
+    case 'cabinet3d':
+      return `#/gabinete-3d/${state.lang}`;
     case 'apparatus':
       return `#/fontes/${state.lang}`;
     case 'drive':
       return `#/drive/${state.lang}`;
+    case 'slides':
+      return state.googleSlidesId ? `#/slides/${state.googleSlidesId}` : '#/slides';
+    case 'docs':
+      return state.googleDocId ? `#/docs/${state.googleDocId}` : '#/docs';
     case 'studio':
       return `#/studio/${state.deck}/${state.lang}/${slideTag}`;
     case 'presenter':
@@ -160,7 +203,9 @@ export default function App() {
     setIsSigningInCloud(true);
     try {
       const user = await store.signInCloudSync();
-      notify(`Sincronização Firestore conectada (${user.email || 'Google'}).`);
+      if (user) {
+        notify(`Sincronização Firestore conectada (${user.email || 'Google'}).`);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Autenticação Google cancelada.';
       notify(msg);
@@ -276,6 +321,7 @@ export default function App() {
   const currentOverride = store.getSlideOverride(route.deck, route.lang, route.slideIndex);
   const currentModified = store.isSlideModified(route.deck, route.lang, route.slideIndex);
   const isPresenter = route.view === 'presenter';
+  const isFullBleed3D = route.view === 'cabinet3d';
 
   return (
     <div className="min-h-screen flex flex-col text-[#1c1c1c]">
@@ -289,7 +335,7 @@ export default function App() {
 
       {/* Variation 8 Unified Structural Shell: 80px Vertical Left Rail + Content Column */}
       <div className="flex-1 flex min-w-0">
-        {!isPresenter && (
+        {!isPresenter && !isFullBleed3D && (
           <aside
             aria-label="Filiação institucional"
             className="no-print hidden lg:flex w-20 shrink-0 border-r-[1.5px] border-[#1c1c1c] items-center justify-center py-8"
@@ -301,8 +347,9 @@ export default function App() {
         )}
 
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Strict 3-Zone Top Bar Contract (Hidden in Print) */}
-          <header className="no-print border-b-[1.5px] border-[#1c1c1c] bg-[#f2efeb]/90 backdrop-blur-[4px]">
+          {/* Strict 3-Zone Top Bar Contract (Hidden in Print & Full-Bleed 3D Scene) */}
+          {!isFullBleed3D && (
+            <header className="no-print border-b-[1.5px] border-[#1c1c1c] bg-[#f2efeb]/90 backdrop-blur-[4px]">
             <div className="max-w-[1440px] mx-auto flex items-center justify-between gap-8 px-6 lg:px-10 py-4">
               {/* Zone 1: Single Text Wordmark */}
               <a
@@ -371,6 +418,30 @@ export default function App() {
 
                 <button
                   type="button"
+                  onClick={() => navigateState({ ...route, view: 'slides' })}
+                  className={`py-1 border-b transition-colors whitespace-nowrap shrink-0 ${
+                    route.view === 'slides'
+                      ? 'border-[#7e2a1f] text-[#7e2a1f] font-bold'
+                      : 'border-transparent hover:text-[#1c1c1c]'
+                  }`}
+                >
+                  {copy.navSlides}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigateState({ ...route, view: 'docs' })}
+                  className={`py-1 border-b transition-colors whitespace-nowrap shrink-0 ${
+                    route.view === 'docs'
+                      ? 'border-[#7e2a1f] text-[#7e2a1f] font-bold'
+                      : 'border-transparent hover:text-[#1c1c1c]'
+                  }`}
+                >
+                  {copy.navDocs}
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => navigateState({ ...route, view: 'drive' })}
                   className={`py-1 border-b transition-colors whitespace-nowrap shrink-0 ${
                     route.view === 'drive'
@@ -424,6 +495,20 @@ export default function App() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => navigateState({ ...route, view: 'slides' })}
+                  className="text-left py-1 text-[#1c1c1c]/80"
+                >
+                  {copy.navSlides}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateState({ ...route, view: 'docs' })}
+                  className="text-left py-1 text-[#1c1c1c]/80"
+                >
+                  {copy.navDocs}
+                </button>
+                <button
+                  type="button"
                   onClick={() => navigateState({ ...route, view: 'atlas' })}
                   className="text-left py-1 text-[#1c1c1c]/80"
                 >
@@ -453,9 +538,10 @@ export default function App() {
               </nav>
             )}
           </header>
+          )}
 
           {/* Fixed Light Paper Utility Strip (Languages + Firestore Cloud Sync + Drive) */}
-          {!isPresenter && (
+          {!isPresenter && !isFullBleed3D && (
             <div className="no-print border-b border-[#1c1c1c]/15 bg-white/35 backdrop-blur-[3px]">
               <div className="max-w-[1440px] mx-auto px-6 lg:px-10 py-2 flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] text-[#1c1c1c]/70">
                 <div className="flex items-center gap-2">
@@ -552,7 +638,9 @@ export default function App() {
                 onOpenAtlasEntry={(entry, compareWithId) =>
                   setLightboxState({ entry, compareId: compareWithId || null })
                 }
-                onNavigateView={(view) => navigateState({ ...route, view })}
+                onNavigateView={(view, atlasSection) =>
+                  navigateState({ ...route, view, atlasSection })
+                }
                 onNotify={notify}
               />
             )}
@@ -577,6 +665,8 @@ export default function App() {
                 onOpenPresenter={() => navigateState({ ...route, view: 'presenter' })}
                 onOpenStudioForSlide={() => navigateState({ ...route, view: 'studio' })}
                 onOpenSources={() => navigateState({ ...route, view: 'apparatus' })}
+                onOpenGoogleSlides={() => navigateState({ ...route, view: 'slides' })}
+                onOpenGoogleDocs={() => navigateState({ ...route, view: 'docs' })}
                 onNotify={notify}
               />
             )}
@@ -597,18 +687,85 @@ export default function App() {
                 onOpenLightbox={(entry, compareWithId) =>
                   setLightboxState({ entry, compareId: compareWithId || null })
                 }
+                onOpenGoogleSlides={() => navigateState({ ...route, view: 'slides' })}
                 onExit={() => navigateState({ ...route, view: 'reader' })}
+              />
+            )}
+
+            {route.view === 'slides' && (
+              <GoogleSlidesWorkspace
+                lang={route.lang}
+                ui={activeUi}
+                user={driveUser}
+                needsAuth={needsDriveAuth}
+                isSigningIn={isSigningInDrive}
+                initialPresentationId={route.googleSlidesId}
+                onSignIn={handleDriveSignIn}
+                onSignOut={handleDriveSignOut}
+                getMergedSlides={store.getMergedSlides}
+                getPresenterNote={(deck, idx) => store.getPresenterNote(deck, idx, route.lang)}
+                onOpenDeckInReader={(deck, lang, slideIndex = 0) =>
+                  navigateState({ view: 'reader', deck, lang, slideIndex })
+                }
+                onNotify={notify}
+              />
+            )}
+
+            {route.view === 'docs' && (
+              <GoogleDocsWorkspace
+                lang={route.lang}
+                ui={activeUi}
+                user={driveUser}
+                needsAuth={needsDriveAuth}
+                isSigningIn={isSigningInDrive}
+                initialDocId={route.googleDocId}
+                onSignIn={handleDriveSignIn}
+                onSignOut={handleDriveSignOut}
+                getMergedSlides={store.getMergedSlides}
+                getPresenterNote={(deck, idx) => store.getPresenterNote(deck, idx, route.lang)}
+                onNotify={notify}
               />
             )}
 
             {route.view === 'atlas' && (
               <AtlasGallery
+                lang={route.lang}
+                initialSection={route.atlasSection || 'catalog'}
+                canSaveToFirestore={store.cloudSyncActive}
+                canSaveToDrive={!needsDriveAuth}
+                savedAtelierRecords={store.savedAtelierRecords}
+                onSaveAtelierRecord={store.saveAtelierRecordToFirestore}
+                onDeleteAtelierRecord={store.deleteAtelierRecordFromFirestore}
+                onSignInCloud={handleCloudSignIn}
+                onOpenDriveView={() => navigateState({ ...route, view: 'drive' })}
+                onOpenCabinet3D={() => navigateState({ ...route, view: 'cabinet3d' })}
+                onChangeSection={(sec) =>
+                  navigateState({ ...route, view: 'atlas', atlasSection: sec })
+                }
                 onOpenLightbox={(entry, compareWithId) =>
                   setLightboxState({ entry, compareId: compareWithId || null })
                 }
                 onJumpToSlide={(deck, slideIndex) =>
                   navigateState({ view: 'reader', deck, lang: route.lang, slideIndex })
                 }
+                onNotify={notify}
+              />
+            )}
+
+            {route.view === 'cabinet3d' && (
+              <Cabinet3DScene
+                canSaveToFirestore={store.cloudSyncActive}
+                savedSpatialRecords={store.savedAtelierRecords}
+                onSaveSpatialRecord={store.saveAtelierRecordToFirestore}
+                onSignInCloud={handleCloudSignIn}
+                onOpenLightbox={(entry) => setLightboxState({ entry, compareId: null })}
+                onJumpToSlide={(deck, slideIndex) =>
+                  navigateState({ view: 'reader', deck, lang: route.lang, slideIndex })
+                }
+                onExitCabinet={() =>
+                  navigateState({ ...route, view: 'atlas', atlasSection: 'catalog' })
+                }
+                onNotify={notify}
               />
             )}
 
@@ -669,6 +826,14 @@ export default function App() {
                 buildDeckExportJson={store.buildDeckExportJson}
                 buildWorkspaceBackupJson={store.buildWorkspaceBackupJson}
                 onImportJson={store.importWorkspaceJson}
+                onOpenPresentation={(presentationId) =>
+                  navigateState({ ...route, view: 'slides', googleSlidesId: presentationId })
+                }
+                onOpenGoogleSlidesView={() => navigateState({ ...route, view: 'slides' })}
+                onOpenDoc={(docId) =>
+                  navigateState({ ...route, view: 'docs', googleDocId: docId })
+                }
+                onOpenGoogleDocsView={() => navigateState({ ...route, view: 'docs' })}
                 onNotify={notify}
               />
             )}
@@ -676,8 +841,8 @@ export default function App() {
         </div>
       </div>
 
-      {/* Variation 8 Full-Span Footer Bar (Hidden in Presenter Stage & Print) */}
-      {!isPresenter && (
+      {/* Variation 8 Full-Span Footer Bar (Hidden in Presenter Stage, Full-Bleed 3D & Print) */}
+      {!isPresenter && !isFullBleed3D && (
         <footer className="no-print border-t-[1.5px] border-[#1c1c1c] bg-[#f2efeb] py-4 px-6 lg:px-10 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.12em] text-[#1c1c1c]">
           <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">

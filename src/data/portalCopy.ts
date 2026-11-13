@@ -9,6 +9,13 @@ export interface PortalLocaleStrings {
   navTranslations: string;
   navSources: string;
   navDrive: string;
+  navSlides: string;
+  navDocs: string;
+  openInGoogleSlidesBtn: string;
+  exportToGoogleSlidesBtn: string;
+  openInGoogleDocsBtn: string;
+  exportToGoogleDocsBtn: string;
+  presentMySlides: string;
   presenterCta: string;
   backToReaderCta: string;
   langBarLabel: string;
@@ -35,6 +42,11 @@ export interface PortalLocaleStrings {
   compareBrantRipa: string;
   viewFullCatalog: string;
   lightTableBadge: string;
+  open3dCabinetBtn: string;
+  openImageAtelierBtn: string;
+  cabinetTabCatalog: string;
+  cabinetTabAtelier: string;
+  cabinetTab3D: string;
 
   // SlideReader Chrome
   deck01Short: string;
@@ -72,6 +84,13 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     navTranslations: 'Traduções',
     navSources: 'Fontes & Glossário',
     navDrive: 'Google Drive',
+    navSlides: 'Google Slides',
+    navDocs: 'Google Docs',
+    openInGoogleSlidesBtn: 'Abrir no Google Slides',
+    exportToGoogleSlidesBtn: 'Exportar para Google Slides',
+    openInGoogleDocsBtn: 'Abrir no Google Docs',
+    exportToGoogleDocsBtn: 'Exportar para Google Docs',
+    presentMySlides: 'Meus Slides do Google',
     presenterCta: 'Modo Apresentador',
     backToReaderCta: 'Voltar ao Leitor',
     langBarLabel: 'Idioma:',
@@ -97,6 +116,11 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     compareBrantRipa: 'Cotejar Brant (1494) e Ripa (1603)',
     viewFullCatalog: 'Ver catálogo completo',
     lightTableBadge: 'Mesa de luz',
+    open3dCabinetBtn: 'Gabinete 3D Espacial',
+    openImageAtelierBtn: 'Atelier de Pranchas (Criar / Editar)',
+    cabinetTabCatalog: 'Catálogo Analítico (6)',
+    cabinetTabAtelier: 'Atelier de Pranchas · Criar & Editar',
+    cabinetTab3D: 'Gabinete 3D Espacial (100vw)',
 
     deck01Short: '01. Comunicação (13)',
     deck02Short: '02. Percurso (14)',
@@ -132,6 +156,13 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     navTranslations: 'Translations',
     navSources: 'Sources & Glossary',
     navDrive: 'Google Drive',
+    navSlides: 'Google Slides',
+    navDocs: 'Google Docs',
+    openInGoogleSlidesBtn: 'Open in Google Slides',
+    exportToGoogleSlidesBtn: 'Export to Google Slides',
+    openInGoogleDocsBtn: 'Open in Google Docs',
+    exportToGoogleDocsBtn: 'Export to Google Docs',
+    presentMySlides: 'My Google Slides',
     presenterCta: 'Presenter Mode',
     backToReaderCta: 'Back to Reader',
     langBarLabel: 'Language:',
@@ -157,6 +188,11 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     compareBrantRipa: 'Compare Brant (1494) & Ripa (1603)',
     viewFullCatalog: 'View full catalogue',
     lightTableBadge: 'Light table',
+    open3dCabinetBtn: '3D Spatial Cabinet',
+    openImageAtelierBtn: 'Plate Atelier (Create / Edit)',
+    cabinetTabCatalog: 'Analytical Catalogue (6)',
+    cabinetTabAtelier: 'Plate Atelier · Create & Edit',
+    cabinetTab3D: '3D Spatial Cabinet (100vw)',
 
     deck01Short: '01. Paper (13)',
     deck02Short: '02. Trajectory (14)',
@@ -192,6 +228,13 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     navTranslations: 'Traductions',
     navSources: 'Sources & Glossaire',
     navDrive: 'Google Drive',
+    navSlides: 'Google Slides',
+    navDocs: 'Google Docs',
+    openInGoogleSlidesBtn: 'Ouvrir dans Google Slides',
+    exportToGoogleSlidesBtn: 'Exporter vers Google Slides',
+    openInGoogleDocsBtn: 'Ouvrir dans Google Docs',
+    exportToGoogleDocsBtn: 'Exporter vers Google Docs',
+    presentMySlides: 'Mes Google Slides',
     presenterCta: 'Mode Présentateur',
     backToReaderCta: 'Retour au Lecteur',
     langBarLabel: 'Langue :',
@@ -217,6 +260,11 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     compareBrantRipa: 'Confronter Brant (1494) et Ripa (1603)',
     viewFullCatalog: 'Voir le catalogue complet',
     lightTableBadge: 'Table lumineuse',
+    open3dCabinetBtn: 'Cabinet 3D Spatial',
+    openImageAtelierBtn: 'Atelier des Planches (Créer / Éditer)',
+    cabinetTabCatalog: 'Catalogue Analytique (6)',
+    cabinetTabAtelier: 'Atelier des Planches · Créer & Éditer',
+    cabinetTab3D: 'Cabinet 3D Spatial (100vw)',
 
     deck01Short: '01. Communication (13)',
     deck02Short: '02. Parcours (14)',
@@ -252,6 +300,13 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     navTranslations: 'Traduzioni',
     navSources: 'Fonti & Glossario',
     navDrive: 'Google Drive',
+    navSlides: 'Google Slides',
+    navDocs: 'Google Docs',
+    openInGoogleSlidesBtn: 'Apri in Google Slides',
+    exportToGoogleSlidesBtn: 'Esporta in Google Slides',
+    openInGoogleDocsBtn: 'Apri in Google Docs',
+    exportToGoogleDocsBtn: 'Esporta in Google Docs',
+    presentMySlides: 'Le mie Google Slides',
     presenterCta: 'Modalità Relatrice',
     backToReaderCta: 'Torna al Lettore',
     langBarLabel: 'Lingua:',
@@ -277,6 +332,11 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     compareBrantRipa: 'Confronta Brant (1494) e Ripa (1603)',
     viewFullCatalog: 'Vedi catalogo completo',
     lightTableBadge: 'Tavolo luminoso',
+    open3dCabinetBtn: 'Gabinetto 3D Spaziale',
+    openImageAtelierBtn: 'Atelier Tavole (Crea / Modifica)',
+    cabinetTabCatalog: 'Catalogo Analitico (6)',
+    cabinetTabAtelier: 'Atelier Tavole · Crea & Modifica',
+    cabinetTab3D: 'Gabinetto 3D Spaziale (100vw)',
 
     deck01Short: '01. Comunicazione (13)',
     deck02Short: '02. Percorso (14)',
@@ -312,6 +372,13 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     navTranslations: 'Vertalingen',
     navSources: 'Bronnen & Begrippen',
     navDrive: 'Google Drive',
+    navSlides: 'Google Slides',
+    navDocs: 'Google Docs',
+    openInGoogleSlidesBtn: 'Openen in Google Slides',
+    exportToGoogleSlidesBtn: 'Exporteren naar Google Slides',
+    openInGoogleDocsBtn: 'Openen in Google Docs',
+    exportToGoogleDocsBtn: 'Exporteren naar Google Docs',
+    presentMySlides: 'Mijn Google Slides',
     presenterCta: 'Sprekersmodus',
     backToReaderCta: 'Terug naar Lezer',
     langBarLabel: 'Taal:',
@@ -337,6 +404,11 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     compareBrantRipa: 'Vergelijk Brant (1494) & Ripa (1603)',
     viewFullCatalog: 'Volledige catalogus bekijken',
     lightTableBadge: 'Lichttafel',
+    open3dCabinetBtn: '3D Ruimtelijk Kabinet',
+    openImageAtelierBtn: 'Platenatelier (Maken / Bewerken)',
+    cabinetTabCatalog: 'Analytische Catalogus (6)',
+    cabinetTabAtelier: 'Platenatelier · Maken & Bewerken',
+    cabinetTab3D: '3D Ruimtelijk Kabinet (100vw)',
 
     deck01Short: '01. Voordracht (13)',
     deck02Short: '02. Traject (14)',

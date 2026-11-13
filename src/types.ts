@@ -2,7 +2,17 @@ export type LangCode = 'pt' | 'en' | 'fr' | 'it' | 'nl';
 
 export type DeckId = 'trajeto' | 'representacao';
 
-export type ViewMode = 'home' | 'reader' | 'presenter' | 'atlas' | 'studio' | 'apparatus' | 'drive';
+export type ViewMode =
+  | 'home'
+  | 'reader'
+  | 'presenter'
+  | 'slides'
+  | 'docs'
+  | 'atlas'
+  | 'cabinet3d'
+  | 'studio'
+  | 'apparatus'
+  | 'drive';
 
 export type ReviewStatus = 'pending' | 'approved';
 
@@ -16,6 +26,7 @@ export interface SlideItem {
   blocks: SlideBlock[];
   footer: string;
   source?: string;
+  slideImage?: string;
 }
 
 export interface SlideOverride {

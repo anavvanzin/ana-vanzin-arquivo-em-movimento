@@ -6,6 +6,7 @@ import {
   Columns2,
   Expand,
   ExternalLink,
+  FileText,
   Link2,
   List,
   Maximize2,
@@ -33,6 +34,8 @@ interface SlideReaderProps {
   onOpenPresenter: () => void;
   onOpenStudioForSlide: () => void;
   onOpenSources: () => void;
+  onOpenGoogleSlides?: () => void;
+  onOpenGoogleDocs?: () => void;
   onNotify: (msg: string) => void;
 }
 
@@ -51,6 +54,8 @@ export function SlideReader({
   onOpenPresenter,
   onOpenStudioForSlide,
   onOpenSources,
+  onOpenGoogleSlides,
+  onOpenGoogleDocs,
   onNotify,
 }: SlideReaderProps) {
   const [tocOpen, setTocOpen] = useState(false);
@@ -374,6 +379,45 @@ export function SlideReader({
               </h1>
             </header>
 
+            {/* Authentic 16:9 Slide Presentation Visual */}
+            {current.slideImage && (
+              <div className="relative group w-full bg-[#1c1c1c] border-[1.5px] border-[#1c1c1c] shadow-[4px_4px_0px_0px_#1c1c1c] overflow-hidden">
+                <div className="relative aspect-[16/9] w-full bg-[#151515] flex items-center justify-center">
+                  <img
+                    src={current.slideImage}
+                    alt={current.title.replace(/\n/g, ' ')}
+                    className="w-full h-full object-contain"
+                    loading="eager"
+                  />
+                  <div className="absolute top-3 left-3 bg-[#1c1c1c]/90 text-[#f2efeb] px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest border border-[#f2efeb]/20 backdrop-blur-sm pointer-events-none">
+                    Slide {String(safeIndex + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')} · Saberes França-Brasil 2026
+                  </div>
+                  <div className="absolute bottom-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <button
+                      type="button"
+                      onClick={onOpenPresenter}
+                      className="px-2.5 py-1 bg-[#f2efeb] text-[#1c1c1c] font-mono text-[10px] uppercase tracking-wider border border-[#1c1c1c] hover:bg-white inline-flex items-center gap-1.5 shadow-sm"
+                      title={`${copy.presenterShortBtn} (P)`}
+                    >
+                      <Maximize2 className="w-3 h-3" />
+                      <span>{copy.presenterShortBtn}</span>
+                    </button>
+                    {onOpenGoogleSlides && (
+                      <button
+                        type="button"
+                        onClick={onOpenGoogleSlides}
+                        className="px-2.5 py-1 bg-[#7e2a1f] text-[#f2efeb] font-mono text-[10px] uppercase tracking-wider border border-[#7e2a1f] hover:bg-[#1c1c1c] inline-flex items-center gap-1.5 shadow-sm"
+                        title="Google Slides"
+                      >
+                        <Presentation className="w-3 h-3" />
+                        <span>Google Slides</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Analytical Blocks */}
             <div
               className={
@@ -480,6 +524,30 @@ export function SlideReader({
               <Presentation className="w-3.5 h-3.5" />
               <span>{copy.presenterShortBtn}</span>
             </button>
+
+            {onOpenGoogleSlides && (
+              <button
+                type="button"
+                onClick={onOpenGoogleSlides}
+                className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#7e2a1f]/60 text-[#7e2a1f] hover:border-[#7e2a1f] hover:bg-[#7e2a1f] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                title="Apresentar ou Exportar no Google Slides"
+              >
+                <Presentation className="w-3.5 h-3.5" />
+                <span>Google Slides</span>
+              </button>
+            )}
+
+            {onOpenGoogleDocs && (
+              <button
+                type="button"
+                onClick={onOpenGoogleDocs}
+                className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c]/40 text-[#1c1c1c] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                title="Ler ou Exportar como Google Doc"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Google Docs</span>
+              </button>
+            )}
 
             <button
               type="button"

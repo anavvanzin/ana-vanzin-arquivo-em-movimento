@@ -1,19 +1,21 @@
 interface GoogleSignInButtonProps {
   onClick: () => void;
   disabled?: boolean;
+  loading?: boolean;
   label?: string;
 }
 
 export function GoogleSignInButton({
   onClick,
   disabled = false,
+  loading = false,
   label = 'Sign in with Google',
 }: GoogleSignInButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
       className="gsi-material-button"
     >
       <div className="gsi-material-button-state" />

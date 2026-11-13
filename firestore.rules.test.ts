@@ -294,4 +294,60 @@ describe('ICONOCRACIA Firestore Security Rules — Dirty Dozen Suite', () => {
       )
     );
   });
+
+  it('13. Enforces Master Gate, size caps, and terminal archive lock on atelierRecords', async () => {
+    const dbOrphan = verifiedDb('user_orphan_atelier');
+    await assertFails(
+      setDoc(doc(dbOrphan, 'users', 'user_orphan_atelier', 'atelierRecords', 'plate_01'), {
+        ownerId: 'user_orphan_atelier',
+        kind: 'image_plate',
+        title: 'Estudo de gravura',
+        promptOrSummary: 'Xilogravura renascentista',
+        axis: 'venda',
+        specSummary: '4:3 · 1K',
+        status: 'active',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+
+    await seedValidWorkspace('user_A');
+    const dbA = verifiedDb('user_A');
+    const recRef = doc(dbA, 'users', 'user_A', 'atelierRecords', 'plate_1603');
+    await assertSucceeds(
+      setDoc(recRef, {
+        ownerId: 'user_A',
+        kind: 'image_plate',
+        title: 'Estudo Ripa 1603',
+        promptOrSummary: 'Alegoria da Iustitia com venda e balança.',
+        axis: 'venda',
+        specSummary: '4:3 · 2K · Grounded',
+        status: 'active',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+
+    // Reject oversized base64/text injection (>2000 chars)
+    await assertFails(
+      updateDoc(recRef, {
+        promptOrSummary: 'B'.repeat(2400),
+        updatedAt: serverTimestamp(),
+      })
+    );
+
+    // Archive transition succeeds once, then locks further updates
+    await assertSucceeds(
+      updateDoc(recRef, {
+        status: 'archived',
+        updatedAt: serverTimestamp(),
+      })
+    );
+    await assertFails(
+      updateDoc(recRef, {
+        title: 'Tentativa pós-arquivo',
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
 });

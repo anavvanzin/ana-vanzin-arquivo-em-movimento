@@ -25,6 +25,7 @@ interface PresenterStageProps {
   onChangeSlide: (index: number) => void;
   onChangeLang: (lang: LangCode) => void;
   onOpenLightbox: (entry: AtlasEntry, compareWithId?: string) => void;
+  onOpenGoogleSlides?: () => void;
   onExit: () => void;
 }
 
@@ -45,11 +46,13 @@ export function PresenterStage({
   onChangeSlide,
   onChangeLang,
   onOpenLightbox,
+  onOpenGoogleSlides,
   onExit,
 }: PresenterStageProps) {
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [targetMinutes, setTargetMinutes] = useState<number>(20);
+  const [stageDisplayMode, setStageDisplayMode] = useState<'slide' | 'split' | 'text'>('slide');
 
   const safeIndex = Math.max(0, Math.min(slides.length - 1, slideIndex));
   const current = slides[safeIndex];
@@ -196,6 +199,17 @@ export function PresenterStage({
             ))}
           </div>
 
+          {onOpenGoogleSlides && (
+            <button
+              type="button"
+              onClick={onOpenGoogleSlides}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] bg-[#262626] hover:bg-[#383838] border border-[#f2efeb]/25 text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+              title="Apresentar com Google Slides"
+            >
+              <span>Google Slides</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={toggleFullscreen}
@@ -232,56 +246,124 @@ export function PresenterStage({
         {/* Active Slide Stage */}
         <section className="lg:col-span-7 flex flex-col justify-between p-8 sm:p-10 bg-[#232323] border border-[#f2efeb]/25">
           <div className="space-y-6">
-            <div className="flex items-center justify-between gap-4 border-b border-[#f2efeb]/15 pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#f2efeb]/15 pb-4">
               <span className="font-mono text-sm tabular-nums text-[#e5988b]">
                 {ui.number.toUpperCase()} {String(safeIndex + 1).padStart(2, '0')} /{' '}
                 {String(slides.length).padStart(2, '0')}
               </span>
 
-              {linkedAtlas.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => onOpenLightbox(linkedAtlas[0], linkedAtlas[1]?.id)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider bg-[#1c1c1c] hover:bg-[#7e2a1f] border border-[#f2efeb]/35 text-[#f2efeb] transition-colors"
-                >
-                  <Expand className="w-3.5 h-3.5" />
-                  <span>{copy.projectPlateBtn(linkedAtlas.length)}</span>
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {current.slideImage && (
+                  <div className="flex items-center border border-[#f2efeb]/25 bg-[#1c1c1c] p-0.5 font-mono text-[9px] uppercase tracking-wider">
+                    <button
+                      type="button"
+                      onClick={() => setStageDisplayMode('slide')}
+                      className={`px-2 py-1 transition-colors ${
+                        stageDisplayMode === 'slide'
+                          ? 'bg-[#f2efeb] text-[#1c1c1c] font-bold'
+                          : 'text-[#f2efeb]/70 hover:text-[#f2efeb]'
+                      }`}
+                    >
+                      Slide Visual
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStageDisplayMode('split')}
+                      className={`px-2 py-1 transition-colors ${
+                        stageDisplayMode === 'split'
+                          ? 'bg-[#f2efeb] text-[#1c1c1c] font-bold'
+                          : 'text-[#f2efeb]/70 hover:text-[#f2efeb]'
+                      }`}
+                    >
+                      Split
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStageDisplayMode('text')}
+                      className={`px-2 py-1 transition-colors ${
+                        stageDisplayMode === 'text'
+                          ? 'bg-[#f2efeb] text-[#1c1c1c] font-bold'
+                          : 'text-[#f2efeb]/70 hover:text-[#f2efeb]'
+                      }`}
+                    >
+                      Texto
+                    </button>
+                  </div>
+                )}
+
+                {linkedAtlas.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenLightbox(linkedAtlas[0], linkedAtlas[1]?.id)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider bg-[#1c1c1c] hover:bg-[#7e2a1f] border border-[#f2efeb]/35 text-[#f2efeb] transition-colors"
+                  >
+                    <Expand className="w-3.5 h-3.5" />
+                    <span>{copy.projectPlateBtn(linkedAtlas.length)}</span>
+                  </button>
+                )}
+              </div>
             </div>
 
-            <h1 className="font-serif font-light text-3xl sm:text-4xl lg:text-5xl leading-[1.08] text-[#f2efeb] whitespace-pre-line">
-              {current.title}
-            </h1>
-
-            <div
-              className={
-                current.blocks.length === 2 && current.blocks.every((b) => b.label)
-                  ? 'grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2'
-                  : 'space-y-5 pt-2'
-              }
-            >
-              {current.blocks.map((b, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 bg-[#1c1c1c] border border-[#f2efeb]/15 space-y-1.5"
-                >
-                  {b.label && (
-                    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#e5988b]">
-                      {b.label}
-                    </p>
-                  )}
-                  <p className="text-base sm:text-lg leading-relaxed text-[#f2efeb]/90 whitespace-pre-line">
-                    {b.text}
-                  </p>
+            {/* Authentic 16:9 Slide Presentation Projection */}
+            {current.slideImage && stageDisplayMode !== 'text' && (
+              <div className="relative w-full aspect-[16/9] bg-[#121212] border border-[#f2efeb]/25 shadow-2xl overflow-hidden flex items-center justify-center">
+                <img
+                  src={current.slideImage}
+                  alt={current.title.replace(/\n/g, ' ')}
+                  className="w-full h-full object-contain"
+                  loading="eager"
+                />
+                <div className="absolute top-2 left-2 bg-[#1c1c1c]/90 text-[#f2efeb] px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest border border-[#f2efeb]/25 pointer-events-none">
+                  Slide {String(safeIndex + 1).padStart(2, '0')} · Saberes França-Brasil 2026
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {/* Title & Analytical Points */}
+            {(stageDisplayMode === 'text' || stageDisplayMode === 'split' || !current.slideImage) && (
+              <div className="space-y-4">
+                <h1 className="font-serif font-light text-2xl sm:text-3xl lg:text-4xl leading-[1.1] text-[#f2efeb] whitespace-pre-line">
+                  {current.title}
+                </h1>
+
+                <div
+                  className={
+                    current.blocks.length === 2 && current.blocks.every((b) => b.label)
+                      ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1'
+                      : 'space-y-4 pt-1'
+                  }
+                >
+                  {current.blocks.map((b, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3.5 bg-[#1c1c1c] border border-[#f2efeb]/15 space-y-1"
+                    >
+                      {b.label && (
+                        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#e5988b]">
+                          {b.label}
+                        </p>
+                      )}
+                      <p className="text-sm sm:text-base leading-relaxed text-[#f2efeb]/90 whitespace-pre-line">
+                        {b.text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {stageDisplayMode === 'slide' && current.slideImage && (
+              <div className="pt-2">
+                <p className="font-serif italic text-base text-[#f2efeb]/80">
+                  {current.title.replace(/\n/g, ' ')}
+                </p>
+              </div>
+            )}
           </div>
 
-          <div className="pt-8 mt-8 border-t border-[#f2efeb]/15 space-y-5">
+          <div className="pt-6 mt-6 border-t border-[#f2efeb]/15 space-y-4">
             {current.footer && (
-              <p className="font-serif italic text-lg text-[#f2efeb]/70">{current.footer}</p>
+              <p className="font-serif italic text-base text-[#f2efeb]/70">{current.footer}</p>
             )}
 
             <div className="flex items-center justify-between gap-4">
@@ -326,11 +408,20 @@ export function PresenterStage({
             </div>
 
             {nextSlide ? (
-              <div className="space-y-2">
-                <h2 className="font-serif text-xl text-[#f2efeb]">
+              <div className="space-y-3">
+                {nextSlide.slideImage && (
+                  <div className="relative aspect-[16/9] w-full bg-[#121212] border border-[#f2efeb]/20 overflow-hidden shadow-inner">
+                    <img
+                      src={nextSlide.slideImage}
+                      alt={nextSlide.title.replace(/\n/g, ' ')}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                )}
+                <h2 className="font-serif text-lg text-[#f2efeb]">
                   {nextSlide.title.replace(/\n/g, ' ')}
                 </h2>
-                <p className="text-xs leading-relaxed text-[#f2efeb]/70 line-clamp-3">
+                <p className="text-xs leading-relaxed text-[#f2efeb]/70 line-clamp-2">
                   {nextSlide.blocks.map((b) => (b.label ? `${b.label}: ${b.text}` : b.text)).join(' · ')}
                 </p>
               </div>

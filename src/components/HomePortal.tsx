@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import {
   ArrowRight,
+  Box,
   Check,
   Columns2,
   Copy,
   Expand,
   ExternalLink,
+  FileText,
   Presentation,
+  Wand2,
 } from 'lucide-react';
 import { ATLAS_ENTRIES, LANGUAGES } from '../data/atlasCatalog';
 import { PORTAL_COPY } from '../data/portalCopy';
@@ -30,7 +33,10 @@ interface HomePortalProps {
   onOpenDeck: (deck: DeckId, lang: LangCode, slideIndex?: number) => void;
   onOpenPresenter: (deck: DeckId, lang: LangCode) => void;
   onOpenAtlasEntry: (entry: AtlasEntry, compareWithId?: string) => void;
-  onNavigateView: (view: 'atlas' | 'studio' | 'apparatus') => void;
+  onNavigateView: (
+    view: 'atlas' | 'cabinet3d' | 'studio' | 'apparatus' | 'slides' | 'docs' | 'drive',
+    atlasSection?: 'catalog' | 'atelier'
+  ) => void;
   onNotify?: (msg: string) => void;
 }
 
@@ -264,6 +270,24 @@ export function HomePortal({
                     </div>
                   </div>
 
+                  {isPrimaryDoc && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenDeck(deck.id, lang, 0)}
+                      className="group/thumb relative aspect-[16/9] w-full overflow-hidden bg-[#1c1c1c] border border-[#1c1c1c]/30 hover:border-[#1c1c1c] transition-all block text-left shadow-[2px_2px_0px_0px_#1c1c1c]"
+                    >
+                      <img
+                        src="/slides/slide-01.png"
+                        alt={deck.title}
+                        className="w-full h-full object-contain group-hover/thumb:scale-[1.02] transition-transform duration-200"
+                        loading="eager"
+                      />
+                      <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-[#1c1c1c]/90 text-[#f2efeb] font-mono text-[9px] uppercase tracking-wider border border-white/20">
+                        13 Slides Reais · Saberes França-Brasil 2026
+                      </div>
+                    </button>
+                  )}
+
                   <h2 className="font-serif text-2xl sm:text-[1.95rem] font-medium leading-[1.1] text-[#1c1c1c]">
                     <button
                       type="button"
@@ -328,6 +352,54 @@ export function HomePortal({
                 </article>
               );
             })}
+          </div>
+
+          {/* Google Workspace Integrations: Google Slides & Google Docs */}
+          <div className="py-4 border-t border-[#1c1c1c]/15 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#7e2a1f] font-bold">
+                [ GOOGLE WORKSPACE ]
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#1c1c1c]/60">
+                DRIVE · SLIDES · DOCS
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => onNavigateView('slides')}
+                className="p-3 border border-[#1c1c1c] bg-white/70 hover:bg-[#1c1c1c] hover:text-[#f2efeb] text-left transition-all space-y-1 group"
+              >
+                <div className="flex items-center justify-between text-[#7e2a1f] group-hover:text-[#e5988b]">
+                  <Presentation className="w-4 h-4" />
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+                <div className="font-serif text-sm font-medium leading-tight">
+                  Google Slides
+                </div>
+                <p className="font-mono text-[9px] uppercase tracking-wider text-[#1c1c1c]/60 group-hover:text-[#f2efeb]/70">
+                  Usar meus slides
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigateView('docs')}
+                className="p-3 border border-[#1c1c1c] bg-white/70 hover:bg-[#1c1c1c] hover:text-[#f2efeb] text-left transition-all space-y-1 group"
+              >
+                <div className="flex items-center justify-between text-[#7e2a1f] group-hover:text-[#e5988b]">
+                  <FileText className="w-4 h-4" />
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+                <div className="font-serif text-sm font-medium leading-tight">
+                  Google Docs
+                </div>
+                <p className="font-mono text-[9px] uppercase tracking-wider text-[#1c1c1c]/60 group-hover:text-[#f2efeb]/70">
+                  Ler manuscritos
+                </p>
+              </button>
+            </div>
           </div>
 
           {/* Small Compact Corner Banner: Montesquieu / Serge Dauchy (11/11/2026) */}
@@ -421,7 +493,23 @@ export function HomePortal({
               </h2>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => onNavigateView('cabinet3d')}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+              >
+                <Box className="w-3.5 h-3.5" />
+                <span>{copy.open3dCabinetBtn}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigateView('atlas', 'atelier')}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#7e2a1f] text-[#7e2a1f] hover:bg-[#7e2a1f] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+              >
+                <Wand2 className="w-3.5 h-3.5" />
+                <span>{copy.openImageAtelierBtn}</span>
+              </button>
               <button
                 type="button"
                 onClick={() => onOpenAtlasEntry(ATLAS_ENTRIES[0], 'ripa-1603')}
@@ -432,7 +520,7 @@ export function HomePortal({
               </button>
               <button
                 type="button"
-                onClick={() => onNavigateView('atlas')}
+                onClick={() => onNavigateView('atlas', 'catalog')}
                 className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-[#7e2a1f] hover:underline whitespace-nowrap shrink-0"
               >
                 <span>{copy.viewFullCatalog}</span>

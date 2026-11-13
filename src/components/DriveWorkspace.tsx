@@ -13,6 +13,7 @@ import {
   Loader2,
   LogOut,
   Pencil,
+  Presentation,
   RefreshCw,
   RotateCcw,
   Search,
@@ -67,6 +68,10 @@ interface DriveWorkspaceProps {
     targetDeck?: DeckId,
     targetLang?: LangCode
   ) => { ok: boolean; message: string };
+  onOpenPresentation?: (presentationId: string) => void;
+  onOpenGoogleSlidesView?: () => void;
+  onOpenDoc?: (docId: string) => void;
+  onOpenGoogleDocsView?: () => void;
   onNotify: (msg: string) => void;
 }
 
@@ -118,6 +123,10 @@ export function DriveWorkspace({
   buildDeckExportJson,
   buildWorkspaceBackupJson,
   onImportJson,
+  onOpenPresentation,
+  onOpenGoogleSlidesView,
+  onOpenDoc,
+  onOpenGoogleDocsView,
   onNotify,
 }: DriveWorkspaceProps) {
   const [files, setFiles] = useState<DriveFileItem[]>([]);
@@ -511,8 +520,9 @@ export function DriveWorkspace({
 
   const categoryTabs: { id: DriveFilterCategory; label: string }[] = [
     { id: 'all', label: 'Todos' },
-    { id: 'json', label: 'Pacotes JSON' },
+    { id: 'slides', label: 'Google Slides' },
     { id: 'docs', label: 'Docs & PDFs' },
+    { id: 'json', label: 'Pacotes JSON' },
     { id: 'images', label: 'Pranchas & Imagens' },
     { id: 'folders', label: 'Pastas' },
   ];
@@ -923,6 +933,8 @@ export function DriveWorkspace({
                           <span className="mt-0.5 text-[#1c1c1c]/65 shrink-0">
                             {isFolder ? (
                               <Folder className="w-4 h-4 text-[#7e2a1f]" />
+                            ) : file.mimeType === 'application/vnd.google-apps.presentation' ? (
+                              <Presentation className="w-4 h-4 text-[#7e2a1f]" />
                             ) : isJson ? (
                               <FileJson className="w-4 h-4" />
                             ) : file.mimeType.startsWith('image/') ? (
@@ -974,6 +986,28 @@ export function DriveWorkspace({
 
                         {/* File Affordances */}
                         <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                          {file.mimeType === 'application/vnd.google-apps.presentation' && onOpenPresentation && (
+                            <button
+                              type="button"
+                              onClick={() => onOpenPresentation(file.id)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider border border-[#7e2a1f] bg-[#7e2a1f] text-[#f2efeb] hover:bg-[#1c1c1c] hover:border-[#1c1c1c] transition-colors whitespace-nowrap"
+                            >
+                              <Presentation className="w-3 h-3" />
+                              <span>Apresentar</span>
+                            </button>
+                          )}
+
+                          {file.mimeType === 'application/vnd.google-apps.document' && onOpenDoc && (
+                            <button
+                              type="button"
+                              onClick={() => onOpenDoc(file.id)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] transition-colors whitespace-nowrap"
+                            >
+                              <FileText className="w-3 h-3" />
+                              <span>Abrir Doc</span>
+                            </button>
+                          )}
+
                           {isJson && (
                             <button
                               type="button"

@@ -1,0 +1,6 @@
+{
+  "name": "ICONOCRACIA — Um arquivo em movimento",
+  "description": "Duas apresentações doutorais de Ana Vitória Vanzin Mendes (UFSC) sobre imagens, pesquisa e autoridade jurídica em cinco idiomas, com atlas iconográfico interativo, modo apresentador e estúdio autoral de revisão.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

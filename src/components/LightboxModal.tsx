@@ -387,7 +387,7 @@ export function LightboxModal({
                 >
                   <span className="truncate">
                     <span className="font-mono text-[10px] uppercase opacity-70 mr-1.5">
-                      {ref.deck === 'trajeto' ? 'DOC. 01' : 'DOC. 02'}
+                      {ref.deck === 'representacao' ? 'DOC. 01' : 'DOC. 02'}
                     </span>
                     {ref.contextLabel}
                   </span>

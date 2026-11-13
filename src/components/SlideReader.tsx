@@ -14,6 +14,7 @@ import {
   Printer,
 } from 'lucide-react';
 import { getAtlasForSlide, LANGUAGES } from '../data/atlasCatalog';
+import { PORTAL_COPY } from '../data/portalCopy';
 import { AtlasEntry, DeckId, LangCode, ReviewStatus, SlideItem, UIStrings } from '../types';
 import { ArchivalPlateImage } from './ArchivalPlateImage';
 
@@ -57,6 +58,7 @@ export function SlideReader({
   const safeIndex = Math.max(0, Math.min(slides.length - 1, slideIndex));
   const current = slides[safeIndex];
   const linkedAtlas = getAtlasForSlide(deck, safeIndex);
+  const copy = PORTAL_COPY[lang] || PORTAL_COPY.pt;
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -145,25 +147,25 @@ export function SlideReader({
               >
                 <button
                   type="button"
-                  onClick={() => onChangeDeck('trajeto')}
-                  className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors whitespace-nowrap shrink-0 ${
-                    deck === 'trajeto'
-                      ? 'bg-[#1c1c1c] text-[#f2efeb]'
-                      : 'text-[#1c1c1c]/75 hover:text-[#1c1c1c]'
-                  }`}
-                >
-                  01. Percurso (14)
-                </button>
-                <button
-                  type="button"
                   onClick={() => onChangeDeck('representacao')}
-                  className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border-l border-[#1c1c1c] transition-colors whitespace-nowrap shrink-0 ${
+                  className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors whitespace-nowrap shrink-0 ${
                     deck === 'representacao'
                       ? 'bg-[#1c1c1c] text-[#f2efeb]'
                       : 'text-[#1c1c1c]/75 hover:text-[#1c1c1c]'
                   }`}
                 >
-                  02. Comunicação (13)
+                  {copy.deck01Short}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChangeDeck('trajeto')}
+                  className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border-l border-[#1c1c1c] transition-colors whitespace-nowrap shrink-0 ${
+                    deck === 'trajeto'
+                      ? 'bg-[#1c1c1c] text-[#f2efeb]'
+                      : 'text-[#1c1c1c]/75 hover:text-[#1c1c1c]'
+                  }`}
+                >
+                  {copy.deck02Short}
                 </button>
               </div>
 
@@ -292,15 +294,15 @@ export function SlideReader({
                 {slideStatus === 'approved' ? (
                   <span className="inline-flex items-center gap-1 text-[#14532d] font-bold">
                     <Check className="w-3 h-3" />
-                    Tradução revisada
+                    {copy.translationReviewed}
                   </span>
                 ) : (
-                  <span>Revisão pendente</span>
+                  <span>{copy.reviewPending}</span>
                 )}
                 {isModified && (
                   <>
                     <span aria-hidden="true">·</span>
-                    <span className="text-[#7e2a1f]">Edição autoral ativa</span>
+                    <span className="text-[#7e2a1f]">{copy.authorialEditActive}</span>
                   </>
                 )}
               </div>
@@ -311,7 +313,7 @@ export function SlideReader({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/65">
-                    Pranchas ({linkedAtlas.length})
+                    {copy.platesHeading(linkedAtlas.length)}
                   </p>
                   {linkedAtlas.length >= 2 && (
                     <button
@@ -320,7 +322,7 @@ export function SlideReader({
                       className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-[#7e2a1f] hover:underline"
                     >
                       <Columns2 className="w-3 h-3" />
-                      <span>Comparar</span>
+                      <span>{copy.compareBtn}</span>
                     </button>
                   )}
                 </div>
@@ -343,7 +345,7 @@ export function SlideReader({
                         />
                         <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 bg-[#1c1c1c] text-[#f2efeb] font-mono text-[10px] uppercase tracking-wider">
                           <Expand className="w-2.5 h-2.5" />
-                          <span>Lupa (Z)</span>
+                          <span>{copy.loupeBadge}</span>
                         </span>
                       </div>
                       <div className="p-3 space-y-0.5">
@@ -463,20 +465,20 @@ export function SlideReader({
               type="button"
               onClick={onOpenStudioForSlide}
               className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c]/40 text-[#1c1c1c] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
-              title="Revisar ou editar texto deste slide no Estúdio"
+              title={copy.reviewSlideBtn}
             >
               <PenLine className="w-3.5 h-3.5" />
-              <span>Revisar slide</span>
+              <span>{copy.reviewSlideBtn}</span>
             </button>
 
             <button
               type="button"
               onClick={onOpenPresenter}
               className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c]/40 text-[#1c1c1c] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
-              title="Abrir Modo Apresentador (P)"
+              title={`${copy.presenterShortBtn} (P)`}
             >
               <Presentation className="w-3.5 h-3.5" />
-              <span>Apresentador</span>
+              <span>{copy.presenterShortBtn}</span>
             </button>
 
             <button
@@ -513,7 +515,7 @@ export function SlideReader({
 
         <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-[#1c1c1c]/60">
           <span>
-            {ui.keys} · P apresentador · T sumário{linkedAtlas.length > 0 ? ' · Z lupa' : ''}
+            {ui.keys} · {copy.shortcutsSuffix(linkedAtlas.length > 0)}
           </span>
           <button
             type="button"

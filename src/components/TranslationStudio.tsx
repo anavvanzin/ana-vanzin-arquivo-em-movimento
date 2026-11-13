@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { Check, Cloud, Download, Eye, RotateCcw, Upload } from 'lucide-react';
+import { Check, CheckCircle2, Cloud, Database, Download, Eye, RotateCcw, Upload } from 'lucide-react';
 import { LANGUAGES } from '../data/atlasCatalog';
+import { WORKSPACE_CONSTRAINTS } from '../firebase';
 import {
   DeckId,
   LangCode,
@@ -16,6 +17,8 @@ interface TranslationStudioProps {
   initialLang: LangCode;
   initialSlideIndex: number;
   ui: UIStrings;
+  cloudSyncActive?: boolean;
+  onSignInCloud?: () => Promise<void>;
   getMergedSlides: (deck: DeckId, lang: LangCode) => SlideItem[];
   getSlideOverride: (deck: DeckId, lang: LangCode, index: number) => SlideOverride;
   isSlideModified: (deck: DeckId, lang: LangCode, index: number) => boolean;
@@ -53,6 +56,8 @@ export function TranslationStudio({
   initialLang,
   initialSlideIndex,
   ui,
+  cloudSyncActive = false,
+  onSignInCloud,
   getMergedSlides,
   getSlideOverride,
   isSlideModified,
@@ -160,6 +165,26 @@ export function TranslationStudio({
             <span>Backup completo</span>
           </button>
 
+          {cloudSyncActive ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#14532d]/50 bg-white/75 text-[#14532d] whitespace-nowrap shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Firestore em tempo real</span>
+            </span>
+          ) : (
+            onSignInCloud && (
+              <button
+                type="button"
+                onClick={() => {
+                  void onSignInCloud();
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+              >
+                <Database className="w-3.5 h-3.5" />
+                <span>Sincronizar Firebase</span>
+              </button>
+            )
+          )}
+
           {onOpenDriveWorkspace && (
             <button
               type="button"
@@ -193,25 +218,25 @@ export function TranslationStudio({
           <div className="flex items-center border border-[#1c1c1c] bg-[#f2efeb]">
             <button
               type="button"
-              onClick={() => handleDeckSwitch('trajeto')}
-              className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors whitespace-nowrap ${
-                deck === 'trajeto'
-                  ? 'bg-[#1c1c1c] text-[#f2efeb]'
-                  : 'text-[#1c1c1c]/70 hover:text-[#1c1c1c]'
-              }`}
-            >
-              01. {ui.trajeto}
-            </button>
-            <button
-              type="button"
               onClick={() => handleDeckSwitch('representacao')}
-              className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border-l border-[#1c1c1c] transition-colors whitespace-nowrap ${
+              className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors whitespace-nowrap ${
                 deck === 'representacao'
                   ? 'bg-[#1c1c1c] text-[#f2efeb]'
                   : 'text-[#1c1c1c]/70 hover:text-[#1c1c1c]'
               }`}
             >
-              02. {ui.representacao}
+              01. {ui.representacao}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDeckSwitch('trajeto')}
+              className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border-l border-[#1c1c1c] transition-colors whitespace-nowrap ${
+                deck === 'trajeto'
+                  ? 'bg-[#1c1c1c] text-[#f2efeb]'
+                  : 'text-[#1c1c1c]/70 hover:text-[#1c1c1c]'
+              }`}
+            >
+              02. {ui.trajeto}
             </button>
           </div>
 
@@ -404,6 +429,7 @@ export function TranslationStudio({
             <textarea
               id="studio-title-input"
               rows={2}
+              maxLength={WORKSPACE_CONSTRAINTS.MAX_TITLE_LEN}
               value={targetSlide.title}
               onChange={(e) => onUpdateSlide(deck, targetLang, safeIndex, { title: e.target.value })}
               className="w-full font-serif text-xl sm:text-2xl p-3 bg-[#f2efeb]/80 border border-[#1c1c1c]/35 text-[#1c1c1c] focus:outline-none focus:border-[#7e2a1f]"
@@ -423,6 +449,7 @@ export function TranslationStudio({
                   </span>
                   <input
                     type="text"
+                    maxLength={WORKSPACE_CONSTRAINTS.MAX_BLOCK_LABEL_LEN}
                     value={block.label}
                     placeholder="(opcional)"
                     onChange={(e) => handleBlockChange(idx, 'label', e.target.value)}
@@ -431,6 +458,7 @@ export function TranslationStudio({
                 </div>
                 <textarea
                   rows={3}
+                  maxLength={WORKSPACE_CONSTRAINTS.MAX_BLOCK_TEXT_LEN}
                   value={block.text}
                   onChange={(e) => handleBlockChange(idx, 'text', e.target.value)}
                   aria-label={`Texto do bloco ${idx + 1}`}
@@ -451,6 +479,7 @@ export function TranslationStudio({
             <textarea
               id="studio-footer-input"
               rows={2}
+              maxLength={WORKSPACE_CONSTRAINTS.MAX_FOOTER_LEN}
               value={targetSlide.footer}
               onChange={(e) =>
                 onUpdateSlide(deck, targetLang, safeIndex, { footer: e.target.value })
@@ -470,6 +499,7 @@ export function TranslationStudio({
             <input
               id="studio-philology-input"
               type="text"
+              maxLength={WORKSPACE_CONSTRAINTS.MAX_PHILOLOGY_LEN}
               value={override.philologicalNote || ''}
               onChange={(e) =>
                 onUpdateSlide(deck, targetLang, safeIndex, { philologicalNote: e.target.value })

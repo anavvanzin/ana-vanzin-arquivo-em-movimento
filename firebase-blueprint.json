@@ -1,0 +1,246 @@
+{
+  "entities": {
+    "UserWorkspace": {
+      "title": "UserWorkspace",
+      "description": "Authorial workspace root document for an authenticated researcher in ICONOCRACIA (PII-free).",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the workspace owner."
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "Display label of the researcher."
+        },
+        "preferredDeck": {
+          "type": "string",
+          "enum": ["representacao", "trajeto"],
+          "description": "Default presentation deck opened in the workspace."
+        },
+        "preferredLang": {
+          "type": "string",
+          "enum": ["pt", "en", "fr", "it", "nl"],
+          "description": "Default language edition selected by the researcher."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last-modified timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "displayName",
+        "preferredDeck",
+        "preferredLang",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SlideRevision": {
+      "title": "SlideRevision",
+      "description": "Authorial translation override, review state, philological annotation, and oral speaker note for a specific slide.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the workspace owner."
+        },
+        "deck": {
+          "type": "string",
+          "enum": ["representacao", "trajeto"],
+          "description": "Presentation deck identifier."
+        },
+        "lang": {
+          "type": "string",
+          "enum": ["pt", "en", "fr", "it", "nl"],
+          "description": "Language edition code."
+        },
+        "slideIndex": {
+          "type": "number",
+          "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+          "description": "Zero-based slide index within the presentation."
+        },
+        "reviewStatus": {
+          "type": "string",
+          "enum": ["pending", "approved", "locked"],
+          "description": "Editorial review state; locked is terminal."
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Optional overridden slide title."
+        },
+        "footer": {
+          "type": "string",
+          "maxLength": 600,
+          "description": "Optional overridden methodological footnote."
+        },
+        "blockCount": {
+          "type": "number",
+          "enum": [0, 1, 2, 3, 4],
+          "description": "Number of overridden blocks when custom blocks are saved (0 means canonical blocks)."
+        },
+        "b0Label": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "Block 1 label."
+        },
+        "b0Text": {
+          "type": "string",
+          "maxLength": 1500,
+          "description": "Block 1 text."
+        },
+        "b1Label": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "Block 2 label."
+        },
+        "b1Text": {
+          "type": "string",
+          "maxLength": 1500,
+          "description": "Block 2 text."
+        },
+        "b2Label": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "Block 3 label."
+        },
+        "b2Text": {
+          "type": "string",
+          "maxLength": 1500,
+          "description": "Block 3 text."
+        },
+        "b3Label": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "Block 4 label."
+        },
+        "b3Text": {
+          "type": "string",
+          "maxLength": 1500,
+          "description": "Block 4 text."
+        },
+        "philologicalNote": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Internal philological or legal translation note."
+        },
+        "presenterNote": {
+          "type": "string",
+          "maxLength": 3000,
+          "description": "Oral presentation cue note for Presenter Stage."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last-modified timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "deck",
+        "lang",
+        "slideIndex",
+        "reviewStatus",
+        "blockCount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ResearchNote": {
+      "title": "ResearchNote",
+      "description": "Documentary verification note grounded in primary legal and archival sources.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the note author."
+        },
+        "queryTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300,
+          "description": "Research question or archival locator verified."
+        },
+        "synthesis": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000,
+          "description": "Grounded documentary synthesis text."
+        },
+        "sourcesSummary": {
+          "type": "string",
+          "maxLength": 3000,
+          "description": "Formatted list of verified URLs and titles."
+        },
+        "deck": {
+          "type": "string",
+          "enum": ["representacao", "trajeto"],
+          "description": "Associated presentation dossier."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "archived"],
+          "description": "Lifecycle state; archived is terminal."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last-modified timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "queryTitle",
+        "synthesis",
+        "sourcesSummary",
+        "deck",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserWorkspace" },
+      "description": "Root workspace profile for each authenticated researcher (strictly owner-isolated, no PII)."
+    },
+    "/users/{userId}/slideRevisions/{revisionId}": {
+      "schema": { "$ref": "#/entities/SlideRevision" },
+      "description": "Per-slide translation edits, review approvals, philological notes, and speaker notes owned by userId."
+    },
+    "/users/{userId}/researchNotes/{noteId}": {
+      "schema": { "$ref": "#/entities/ResearchNote" },
+      "description": "Saved documentary verification fichas grounded in archival search, owned by userId."
+    }
+  }
+}

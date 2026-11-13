@@ -1,5 +1,6 @@
-import { ExternalLink } from 'lucide-react';
+import { Database, ExternalLink, Trash2 } from 'lucide-react';
 import { LANGUAGES } from '../data/atlasCatalog';
+import { SavedResearchNote } from '../hooks/useArchiveStore';
 import { EditorialContent, LangCode, UIStrings } from '../types';
 import { ResearchGroundingPanel } from './ResearchGroundingPanel';
 
@@ -8,11 +9,20 @@ interface EditorialApparatusProps {
   editorial: EditorialContent;
   ui: UIStrings;
   canSaveToDrive?: boolean;
+  canSaveToFirestore?: boolean;
+  savedFirestoreNotes?: SavedResearchNote[];
   onSaveNoteToDrive?: (
     title: string,
     synthesis: string,
     sources: { title: string; uri: string }[]
   ) => Promise<void>;
+  onSaveNoteToFirestore?: (
+    title: string,
+    synthesis: string,
+    sources: { title: string; uri: string }[]
+  ) => Promise<void>;
+  onDeleteFirestoreNote?: (noteId: string) => Promise<void>;
+  onSignInCloud?: () => Promise<void>;
   onOpenDriveView?: () => void;
   onNotify?: (msg: string) => void;
   onChangeLang: (lang: LangCode) => void;
@@ -23,7 +33,12 @@ export function EditorialApparatus({
   editorial,
   ui,
   canSaveToDrive = false,
+  canSaveToFirestore = false,
+  savedFirestoreNotes = [],
   onSaveNoteToDrive,
+  onSaveNoteToFirestore,
+  onDeleteFirestoreNote,
+  onSignInCloud,
   onOpenDriveView,
   onNotify,
   onChangeLang,
@@ -170,10 +185,73 @@ export function EditorialApparatus({
       <ResearchGroundingPanel
         lang={lang}
         canSaveToDrive={canSaveToDrive}
+        canSaveToFirestore={canSaveToFirestore}
         onSaveNoteToDrive={onSaveNoteToDrive}
+        onSaveNoteToFirestore={onSaveNoteToFirestore}
+        onSignInCloud={onSignInCloud}
         onRequestDriveView={onOpenDriveView}
         onNotify={onNotify}
       />
+
+      {/* Real-Time Firestore Archived Documentary Verification Notes */}
+      {savedFirestoreNotes.length > 0 && (
+        <section className="p-7 bg-white/75 backdrop-blur-[4px] border border-[#1c1c1c] space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1c1c1c]/15 pb-4">
+            <div className="space-y-1">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#7e2a1f] inline-flex items-center gap-1.5">
+                <Database className="w-3.5 h-3.5" />
+                <span>ACERVO PESSOAL NA NUVEM · FIRESTORE</span>
+              </p>
+              <h2 className="font-serif text-2xl sm:text-3xl font-medium text-[#1c1c1c]">
+                Fichas de verificação documental arquivadas ({savedFirestoreNotes.length})
+              </h2>
+            </div>
+          </div>
+
+          <div className="divide-y divide-[#1c1c1c]/15">
+            {savedFirestoreNotes.map((note) => (
+              <article key={note.id} className="py-5 first:pt-0 last:pb-0 space-y-3">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="space-y-1 min-w-0">
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60 tabular-nums">
+                      {note.deck === 'representacao' ? '[ DOC. 01 ]' : '[ DOC. 02 ]'} ·{' '}
+                      {new Date(note.updatedAtIso).toLocaleDateString('pt-BR')}
+                    </p>
+                    <h3 className="font-serif text-xl font-medium text-[#1c1c1c]">
+                      {note.queryTitle}
+                    </h3>
+                  </div>
+
+                  {onDeleteFirestoreNote && note.status === 'active' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void onDeleteFirestoreNote(note.id).then(() => {
+                          onNotify?.('Ficha removida do Firestore.');
+                        });
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wider border border-[#1c1c1c]/35 text-[#1c1c1c]/75 hover:border-[#7e2a1f] hover:text-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Excluir</span>
+                    </button>
+                  )}
+                </div>
+
+                <p className="text-sm leading-relaxed text-[#1c1c1c]/85 whitespace-pre-line max-w-3xl">
+                  {note.synthesis}
+                </p>
+
+                {note.sourcesSummary && (
+                  <pre className="p-3 bg-[#f2efeb]/85 border border-[#1c1c1c]/15 font-mono text-[11px] leading-relaxed text-[#1c1c1c]/75 whitespace-pre-wrap overflow-x-auto">
+                    {note.sourcesSummary}
+                  </pre>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

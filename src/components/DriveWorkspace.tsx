@@ -682,8 +682,8 @@ export function DriveWorkspace({
                     onChange={(e) => setExportDeck(e.target.value as DeckId)}
                     className="bg-white border border-[#1c1c1c]/40 px-2.5 py-1.5 text-xs font-medium text-[#1c1c1c]"
                   >
-                    <option value="trajeto">01. {ui.trajeto}</option>
-                    <option value="representacao">02. {ui.representacao}</option>
+                    <option value="representacao">01. {ui.representacao}</option>
+                    <option value="trajeto">02. {ui.trajeto}</option>
                   </select>
 
                   <label htmlFor="drive-lang-select" className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/65">

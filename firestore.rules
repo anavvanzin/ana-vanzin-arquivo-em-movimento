@@ -1,0 +1,349 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Hardened Global Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function hasActiveWorkspace(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId)) &&
+        get(/databases/$(database)/documents/users/$(userId)).data.ownerId == request.auth.uid;
+    }
+
+    function isValidDeck(val) {
+      return val is string && val.size() <= 20 && (val == 'representacao' || val == 'trajeto');
+    }
+
+    function isValidLang(val) {
+      return val is string && val.size() <= 5 && (
+        val == 'pt' || val == 'en' || val == 'fr' || val == 'it' || val == 'nl'
+      );
+    }
+
+    function isOptionalBoundedString(data, key, maxLen) {
+      return !(key in data) || (data[key] is string && data[key].size() <= maxLen);
+    }
+
+    // 3. Entity Validation Blueprints (Synchronized verbatim with firebase-blueprint.json)
+    function isValidUserWorkspace(data, userId) {
+      return data.keys().hasAll([
+          'ownerId',
+          'displayName',
+          'preferredDeck',
+          'preferredLang',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'ownerId',
+          'displayName',
+          'preferredDeck',
+          'preferredLang',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.ownerId is string &&
+        data.ownerId.size() >= 1 &&
+        data.ownerId.size() <= 128 &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.ownerId == userId &&
+        data.displayName is string &&
+        data.displayName.size() >= 1 &&
+        data.displayName.size() <= 120 &&
+        isValidDeck(data.preferredDeck) &&
+        isValidLang(data.preferredLang) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidSlideRevision(data, userId) {
+      return data.keys().hasAll([
+          'ownerId',
+          'deck',
+          'lang',
+          'slideIndex',
+          'reviewStatus',
+          'blockCount',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'ownerId',
+          'deck',
+          'lang',
+          'slideIndex',
+          'reviewStatus',
+          'title',
+          'footer',
+          'blockCount',
+          'b0Label',
+          'b0Text',
+          'b1Label',
+          'b1Text',
+          'b2Label',
+          'b2Text',
+          'b3Label',
+          'b3Text',
+          'philologicalNote',
+          'presenterNote',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.ownerId is string &&
+        data.ownerId.size() >= 1 &&
+        data.ownerId.size() <= 128 &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.ownerId == userId &&
+        isValidDeck(data.deck) &&
+        isValidLang(data.lang) &&
+        data.slideIndex is int &&
+        data.slideIndex >= 0 &&
+        data.slideIndex <= 13 &&
+        data.reviewStatus is string &&
+        data.reviewStatus.size() <= 16 &&
+        (data.reviewStatus == 'pending' || data.reviewStatus == 'approved' || data.reviewStatus == 'locked') &&
+        data.blockCount is int &&
+        data.blockCount >= 0 &&
+        data.blockCount <= 4 &&
+        isOptionalBoundedString(data, 'title', 300) &&
+        isOptionalBoundedString(data, 'footer', 600) &&
+        isOptionalBoundedString(data, 'b0Label', 160) &&
+        isOptionalBoundedString(data, 'b0Text', 1500) &&
+        isOptionalBoundedString(data, 'b1Label', 160) &&
+        isOptionalBoundedString(data, 'b1Text', 1500) &&
+        isOptionalBoundedString(data, 'b2Label', 160) &&
+        isOptionalBoundedString(data, 'b2Text', 1500) &&
+        isOptionalBoundedString(data, 'b3Label', 160) &&
+        isOptionalBoundedString(data, 'b3Text', 1500) &&
+        isOptionalBoundedString(data, 'philologicalNote', 1000) &&
+        isOptionalBoundedString(data, 'presenterNote', 3000) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidResearchNote(data, userId) {
+      return data.keys().hasAll([
+          'ownerId',
+          'queryTitle',
+          'synthesis',
+          'sourcesSummary',
+          'deck',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'ownerId',
+          'queryTitle',
+          'synthesis',
+          'sourcesSummary',
+          'deck',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ]) &&
+        data.ownerId is string &&
+        data.ownerId.size() >= 1 &&
+        data.ownerId.size() <= 128 &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.ownerId == userId &&
+        data.queryTitle is string &&
+        data.queryTitle.size() >= 1 &&
+        data.queryTitle.size() <= 300 &&
+        data.synthesis is string &&
+        data.synthesis.size() >= 1 &&
+        data.synthesis.size() <= 8000 &&
+        data.sourcesSummary is string &&
+        data.sourcesSummary.size() <= 3000 &&
+        isValidDeck(data.deck) &&
+        data.status is string &&
+        data.status.size() <= 16 &&
+        (data.status == 'active' || data.status == 'archived') &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // 4. Collection Rules: /users/{userId}
+    match /users/{userId} {
+      allow get: if isOwner(userId) &&
+        isValidId(userId) &&
+        (resource == null || existing().ownerId == request.auth.uid);
+
+      allow create: if isVerifiedUser() &&
+        isOwner(userId) &&
+        isValidId(userId) &&
+        isValidUserWorkspace(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser() &&
+        isValidUserWorkspace(incoming(), userId) &&
+        isOwner(userId) &&
+        isValidId(userId) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          // Action: Update Preferences or Display Name
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'displayName',
+            'preferredDeck',
+            'preferredLang',
+            'updatedAt'
+          ])
+        );
+
+      allow delete: if false;
+
+      // 5. Subcollection: /users/{userId}/slideRevisions/{revisionId}
+      match /slideRevisions/{revisionId} {
+        allow get: if isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(revisionId) &&
+          (resource == null || existing().ownerId == request.auth.uid) &&
+          hasActiveWorkspace(userId);
+
+        allow list: if isOwner(userId) &&
+          existing().ownerId == request.auth.uid;
+
+        allow create: if isVerifiedUser() &&
+          isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(revisionId) &&
+          isValidSlideRevision(incoming(), userId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          hasActiveWorkspace(userId);
+
+        allow update: if isVerifiedUser() &&
+          isValidSlideRevision(incoming(), userId) &&
+          isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(revisionId) &&
+          existing().reviewStatus != 'locked' &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().deck == existing().deck &&
+          incoming().lang == existing().lang &&
+          incoming().slideIndex == existing().slideIndex &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          hasActiveWorkspace(userId) && (
+            // Action 1: Edit translation text, blocks, or philological note
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'title',
+              'footer',
+              'blockCount',
+              'b0Label',
+              'b0Text',
+              'b1Label',
+              'b1Text',
+              'b2Label',
+              'b2Text',
+              'b3Label',
+              'b3Text',
+              'philologicalNote',
+              'presenterNote',
+              'reviewStatus',
+              'updatedAt'
+            ]) ||
+            // Action 2: Toggle reviewStatus or update presenterNote only
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'reviewStatus',
+              'presenterNote',
+              'updatedAt'
+            ])
+          );
+
+        allow delete: if isVerifiedUser() &&
+          isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(revisionId) &&
+          existing().reviewStatus != 'locked' &&
+          existing().ownerId == request.auth.uid &&
+          hasActiveWorkspace(userId);
+      }
+
+      // 6. Subcollection: /users/{userId}/researchNotes/{noteId}
+      match /researchNotes/{noteId} {
+        allow get: if isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(noteId) &&
+          (resource == null || existing().ownerId == request.auth.uid) &&
+          hasActiveWorkspace(userId);
+
+        allow list: if isOwner(userId) &&
+          existing().ownerId == request.auth.uid;
+
+        allow create: if isVerifiedUser() &&
+          isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(noteId) &&
+          isValidResearchNote(incoming(), userId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          hasActiveWorkspace(userId);
+
+        allow update: if isVerifiedUser() &&
+          isValidResearchNote(incoming(), userId) &&
+          isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(noteId) &&
+          existing().status != 'archived' &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().deck == existing().deck &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          hasActiveWorkspace(userId) && (
+            // Action 1: Refine synthesis or sources
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'queryTitle',
+              'synthesis',
+              'sourcesSummary',
+              'status',
+              'updatedAt'
+            ]) ||
+            // Action 2: Archive note (terminal transition)
+            (incoming().status == 'archived' &&
+              incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
+          );
+
+        allow delete: if isVerifiedUser() &&
+          isOwner(userId) &&
+          isValidId(userId) &&
+          isValidId(noteId) &&
+          existing().status != 'archived' &&
+          existing().ownerId == request.auth.uid &&
+          hasActiveWorkspace(userId);
+      }
+    }
+  }
+}

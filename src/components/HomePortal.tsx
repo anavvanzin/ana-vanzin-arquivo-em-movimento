@@ -1,6 +1,15 @@
 import { useState } from 'react';
-import { ArrowRight, Check, Columns2, Copy, Expand, ExternalLink } from 'lucide-react';
+import {
+  ArrowRight,
+  Check,
+  Columns2,
+  Copy,
+  Expand,
+  ExternalLink,
+  Presentation,
+} from 'lucide-react';
 import { ATLAS_ENTRIES, LANGUAGES } from '../data/atlasCatalog';
+import { PORTAL_COPY } from '../data/portalCopy';
 import {
   COMPANION_INTERVENTION_BY_LANG,
   MONTESQUIEU_COMPANION_URL,
@@ -13,7 +22,11 @@ interface HomePortalProps {
   lang: LangCode;
   ui: UIStrings;
   editorial: EditorialContent;
-  getReviewStats: (deck: DeckId, lang: LangCode) => { total: number; approved: number; modified: number };
+  getReviewStats: (
+    deck: DeckId,
+    lang: LangCode
+  ) => { total: number; approved: number; modified: number };
+  onChangeLang: (lang: LangCode) => void;
   onOpenDeck: (deck: DeckId, lang: LangCode, slideIndex?: number) => void;
   onOpenPresenter: (deck: DeckId, lang: LangCode) => void;
   onOpenAtlasEntry: (entry: AtlasEntry, compareWithId?: string) => void;
@@ -21,11 +34,20 @@ interface HomePortalProps {
   onNotify?: (msg: string) => void;
 }
 
+const PRIMARY_LANGS: { code: LangCode; badge: string; fullLabel: string }[] = [
+  { code: 'pt', badge: 'PT', fullLabel: 'Português' },
+  { code: 'en', badge: 'EN', fullLabel: 'English' },
+  { code: 'fr', badge: 'FR', fullLabel: 'Français' },
+  { code: 'it', badge: 'IT', fullLabel: 'Italiano' },
+  { code: 'nl', badge: 'NL', fullLabel: 'Nederlands' },
+];
+
 export function HomePortal({
   lang,
   ui,
   editorial,
   getReviewStats,
+  onChangeLang,
   onOpenDeck,
   onOpenPresenter,
   onOpenAtlasEntry,
@@ -34,6 +56,7 @@ export function HomePortal({
 }: HomePortalProps) {
   const [copiedCompanion, setCopiedCompanion] = useState(false);
   const companion = COMPANION_INTERVENTION_BY_LANG[lang] || COMPANION_INTERVENTION_BY_LANG.pt;
+  const copy = PORTAL_COPY[lang] || PORTAL_COPY.pt;
 
   const handleCopyCompanionCitation = async () => {
     try {
@@ -46,6 +69,7 @@ export function HomePortal({
     }
   };
 
+  // DOC. 01 leads with "Entre representação e autenticação" (13 slides), followed by DOC. 02 ("O que a pesquisa me fez abandonar", 14 slides)
   const decksMeta: {
     id: DeckId;
     docCode: string;
@@ -55,45 +79,47 @@ export function HomePortal({
     subtitle: string;
   }[] = [
     {
-      id: 'trajeto',
-      docCode: '[ DOC. 01 ]',
-      slideCount: 14,
-      category: ui.trajectory,
-      title: ui.trajeto,
-      subtitle: ui.trajetoSub,
-    },
-    {
       id: 'representacao',
-      docCode: '[ DOC. 02 ]',
+      docCode: '[ DOC. 01 ]',
       slideCount: 13,
       category: ui.communication,
       title: ui.representacao,
       subtitle: ui.representacaoSub,
     },
+    {
+      id: 'trajeto',
+      docCode: '[ DOC. 02 ]',
+      slideCount: 14,
+      category: ui.trajectory,
+      title: ui.trajeto,
+      subtitle: ui.trajetoSub,
+    },
   ];
 
   return (
     <div className="w-full">
-      {/* Variation 8 Opening Split: Left Editorial Hero + Right Frosted Archive Panel + Compact Corner Montesquieu Banner */}
+      {/* Variation 8 Opening Split: Left Editorial Hero Leading to DOC. 01 + Right Frosted Archive Panel */}
       <section className="grid grid-cols-1 lg:grid-cols-12 border-b-[1.5px] border-[#1c1c1c]">
         {/* Left Main Stage */}
-        <div className="lg:col-span-7 xl:col-span-8 p-6 sm:p-10 lg:p-14 xl:p-16 lg:border-r-[1.5px] lg:border-[#1c1c1c] flex flex-col justify-between gap-10">
+        <div className="lg:col-span-7 xl:col-span-8 p-6 sm:p-10 lg:p-14 xl:p-16 lg:border-r-[1.5px] lg:border-[#1c1c1c] flex flex-col justify-between gap-8">
           <div className="space-y-6">
             <div>
               <p className="font-script text-[2.85rem] sm:text-[3.5rem] leading-none text-[#1c1c1c] -mb-2 -ml-1 select-none">
                 Ana Vitória Vanzin
               </p>
               <p className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#7e2a1f] ml-1">
-                MENDES — ARQUIVO EM MOVIMENTO
+                {copy.brandSubtitle}
               </p>
             </div>
 
-            <h1 className="font-serif font-light text-[clamp(3.1rem,6.5vw,6.4rem)] leading-[0.86] tracking-[-0.04em] uppercase text-[#1c1c1c]">
+            <h1 className="font-serif font-light text-[clamp(3.1rem,6.3vw,6.2rem)] leading-[0.86] tracking-[-0.04em] uppercase text-[#1c1c1c]">
               Iconocracia
-              <span className="block italic font-medium text-[#7e2a1f]">Movimento</span>
+              <span className="block italic font-medium text-[#7e2a1f]">
+                {copy.heroTitleAccent}
+              </span>
             </h1>
 
-            <p className="font-serif text-xl sm:text-2xl leading-[1.42] text-[#1c1c1c]/90 max-w-[540px]">
+            <p className="font-serif text-xl sm:text-2xl leading-[1.42] text-[#1c1c1c]/90 max-w-[560px]">
               {ui.description}
             </p>
 
@@ -103,6 +129,85 @@ export function HomePortal({
               <span>{ui.date}</span>
               <span aria-hidden="true">·</span>
               <span>ORCID 0009-0004-8464-6761</span>
+            </div>
+
+            {/* Primary Opening Presentation Gateway: Leads Directly to "Entre representação e autenticação" in PT / EN / FR */}
+            <div className="p-5 sm:p-6 bg-white/65 backdrop-blur-[4px] border-[1.5px] border-[#1c1c1c] space-y-4 max-w-2xl">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1c1c1c]/15 pb-2.5">
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#7e2a1f] font-bold">
+                  {copy.leadKicker}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#1c1c1c]/65 tabular-nums">
+                  {copy.leadScopeBadge}
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <h2 className="font-serif text-2xl sm:text-3xl font-medium leading-[1.12] text-[#1c1c1c]">
+                  {ui.representacao}
+                </h2>
+                <p className="text-sm leading-relaxed text-[#1c1c1c]/80">{copy.leadSummary}</p>
+              </div>
+
+              {/* Trilingual + Full Edition Switcher */}
+              <div className="space-y-2">
+                <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/65">
+                  {copy.leadEditionsLabel}
+                </span>
+                <div
+                  role="group"
+                  aria-label={copy.leadEditionsLabel}
+                  className="flex flex-wrap items-center gap-1.5"
+                >
+                  {PRIMARY_LANGS.map((item) => {
+                    const active = item.code === lang;
+                    const isCoreColloquiumLang =
+                      item.code === 'pt' || item.code === 'en' || item.code === 'fr';
+                    return (
+                      <button
+                        key={item.code}
+                        type="button"
+                        onClick={() => onChangeLang(item.code)}
+                        aria-pressed={active}
+                        className={`px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] border transition-colors whitespace-nowrap shrink-0 ${
+                          active
+                            ? 'bg-[#7e2a1f] border-[#7e2a1f] text-[#f2efeb] font-bold'
+                            : isCoreColloquiumLang
+                            ? 'bg-[#f2efeb] border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb]'
+                            : 'bg-white/60 border-[#1c1c1c]/35 text-[#1c1c1c]/75 hover:border-[#1c1c1c] hover:text-[#1c1c1c]'
+                        }`}
+                      >
+                        {item.badge} · {item.fullLabel}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Primary Launch Actions for DOC. 01 */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => onOpenPresenter('representacao', lang)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+                >
+                  <Presentation className="w-3.5 h-3.5" />
+                  <span>
+                    {copy.leadPresentPrimary} ({lang.toUpperCase()})
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onOpenDeck('representacao', lang, 0)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] border border-[#1c1c1c] bg-white/80 text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                >
+                  <span>
+                    {copy.leadOpenSlides} ({lang.toUpperCase()})
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -128,19 +233,24 @@ export function HomePortal({
           </div>
         </div>
 
-        {/* Right Archive Panel (Frosted Veil + DOC 01 / DOC 02 + Compact Corner Montesquieu Banner) */}
+        {/* Right Archive Panel (Frosted Veil + DOC 01 [Representação] / DOC 02 [Trajeto] + Compact Corner Montesquieu Banner) */}
         <aside className="lg:col-span-5 xl:col-span-4 bg-white/40 backdrop-blur-[5px] p-6 sm:p-8 lg:p-10 flex flex-col justify-between gap-6">
           <div className="divide-y divide-[#1c1c1c]/15">
-            {decksMeta.map((deck) => {
+            {decksMeta.map((deck, index) => {
               const stats = getReviewStats(deck.id, lang);
+              const isPrimaryDoc = index === 0;
               return (
                 <article key={deck.id} className="py-6 first:pt-0 space-y-3">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#7e2a1f]">
+                    <span
+                      className={`font-mono text-[10px] uppercase tracking-[0.2em] ${
+                        isPrimaryDoc ? 'text-[#7e2a1f] font-bold' : 'text-[#7e2a1f]'
+                      }`}
+                    >
                       {deck.docCode}
                     </span>
                     <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[#1c1c1c]/60 tabular-nums">
-                      <span>{deck.slideCount} slides</span>
+                      <span>{copy.slidesCountLabel(deck.slideCount)}</span>
                       <span aria-hidden="true">·</span>
                       <span>{deck.category}</span>
                       {stats.approved > 0 && (
@@ -195,16 +305,24 @@ export function HomePortal({
                     <button
                       type="button"
                       onClick={() => onOpenPresenter(deck.id, lang)}
-                      className="px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.12em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                      className={`px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.12em] border transition-colors whitespace-nowrap shrink-0 ${
+                        isPrimaryDoc
+                          ? 'border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f]'
+                          : 'border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb]'
+                      }`}
                     >
-                      Apresentar
+                      {copy.presentBtn}
                     </button>
                     <button
                       type="button"
                       onClick={() => onOpenDeck(deck.id, lang, 0)}
-                      className="px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.12em] border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+                      className={`px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.12em] border transition-colors whitespace-nowrap shrink-0 ${
+                        isPrimaryDoc
+                          ? 'border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb]'
+                          : 'border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f]'
+                      }`}
                     >
-                      Abrir Documento
+                      {copy.openDocBtn}
                     </button>
                   </div>
                 </article>
@@ -293,13 +411,13 @@ export function HomePortal({
           <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#1c1c1c]/15 pb-5">
             <div className="space-y-1.5">
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#7e2a1f]">
-                GABINETE DE ESTUDO · 1494–1906
+                {copy.atlasKicker}
               </p>
               <h2
                 id="atlas-preview-heading"
                 className="font-serif text-3xl sm:text-4xl font-light text-[#1c1c1c]"
               >
-                Atlas iconográfico & inspeção ampliada
+                {copy.atlasHeading}
               </h2>
             </div>
 
@@ -310,14 +428,14 @@ export function HomePortal({
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
               >
                 <Columns2 className="w-3.5 h-3.5" />
-                <span>Cotejar Brant (1494) e Ripa (1603)</span>
+                <span>{copy.compareBrantRipa}</span>
               </button>
               <button
                 type="button"
                 onClick={() => onNavigateView('atlas')}
                 className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-[#7e2a1f] hover:underline whitespace-nowrap shrink-0"
               >
-                <span>Ver catálogo completo</span>
+                <span>{copy.viewFullCatalog}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -333,7 +451,7 @@ export function HomePortal({
                   type="button"
                   onClick={() => onOpenAtlasEntry(entry)}
                   className="relative aspect-[4/3] w-full overflow-hidden bg-[#e7e2da] text-left border-b border-[#1c1c1c]/15"
-                  aria-label={`Inspecionar na mesa de luz: ${entry.title}`}
+                  aria-label={`${copy.lightTableBadge}: ${entry.title}`}
                 >
                   <ArchivalPlateImage
                     src={entry.imageSrc}
@@ -344,7 +462,7 @@ export function HomePortal({
                   />
                   <span className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 px-2.5 py-1 bg-[#1c1c1c] text-[#f2efeb] font-mono text-[10px] uppercase tracking-[0.1em]">
                     <Expand className="w-3 h-3" />
-                    <span>Mesa de luz</span>
+                    <span>{copy.lightTableBadge}</span>
                   </span>
                 </button>
 

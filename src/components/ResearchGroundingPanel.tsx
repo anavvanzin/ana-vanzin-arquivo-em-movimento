@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ExternalLink, FilePlus2, Loader2, Search } from 'lucide-react';
+import { Database, ExternalLink, FilePlus2, Loader2, Search } from 'lucide-react';
+import { WORKSPACE_CONSTRAINTS } from '../firebase';
 import { LangCode } from '../types';
 
 interface GroundingSource {
@@ -16,7 +17,10 @@ interface GroundingResult {
 interface ResearchGroundingPanelProps {
   lang: LangCode;
   canSaveToDrive?: boolean;
+  canSaveToFirestore?: boolean;
   onSaveNoteToDrive?: (title: string, synthesis: string, sources: GroundingSource[]) => Promise<void>;
+  onSaveNoteToFirestore?: (title: string, synthesis: string, sources: GroundingSource[]) => Promise<void>;
+  onSignInCloud?: () => Promise<void>;
   onRequestDriveView?: () => void;
   onNotify?: (msg: string) => void;
 }
@@ -102,13 +106,17 @@ export function buildGroundedNoteHtml(
 export function ResearchGroundingPanel({
   lang,
   canSaveToDrive = false,
+  canSaveToFirestore = false,
   onSaveNoteToDrive,
+  onSaveNoteToFirestore,
+  onSignInCloud,
   onRequestDriveView,
   onNotify,
 }: ResearchGroundingPanelProps) {
   const [query, setQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [savingToDrive, setSavingToDrive] = useState<boolean>(false);
+  const [savingToFirestore, setSavingToFirestore] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [result, setResult] = useState<GroundingResult | null>(null);
   const [lastQuery, setLastQuery] = useState<string>('');
@@ -166,6 +174,20 @@ export function ResearchGroundingPanel({
     }
   };
 
+  const handleSaveToFirestore = async () => {
+    if (!result || !onSaveNoteToFirestore) return;
+    setSavingToFirestore(true);
+    try {
+      await onSaveNoteToFirestore(lastQuery, result.synthesis, result.sources);
+    } catch (err: unknown) {
+      if (onNotify) {
+        onNotify(err instanceof Error ? err.message : 'Erro ao salvar ficha no Firestore.');
+      }
+    } finally {
+      setSavingToFirestore(false);
+    }
+  };
+
   return (
     <section className="p-7 bg-white/75 backdrop-blur-[4px] border-[1.5px] border-[#1c1c1c] space-y-6">
       <div className="space-y-2">
@@ -208,6 +230,7 @@ export function ResearchGroundingPanel({
         <input
           id="archival-grounding-input"
           type="text"
+          maxLength={WORKSPACE_CONSTRAINTS.MAX_QUERY_TITLE_LEN}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Ex.: Exemplar digital de Cesare Ripa Iconologia 1603 Roma página da Giustizia..."
@@ -237,31 +260,62 @@ export function ResearchGroundingPanel({
               {result.sources.length === 1 ? 'fonte localizada' : 'fontes localizadas'}
             </p>
 
-            {canSaveToDrive && onSaveNoteToDrive ? (
-              <button
-                type="button"
-                disabled={savingToDrive}
-                onClick={handleSaveToDrive}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#7e2a1f] bg-[#7e2a1f] text-[#f2efeb] hover:bg-[#1c1c1c] hover:border-[#1c1c1c] transition-colors whitespace-nowrap shrink-0 disabled:opacity-60"
-              >
-                {savingToDrive ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <FilePlus2 className="w-3.5 h-3.5" />
-                )}
-                <span>Salvar ficha como Google Doc no Drive</span>
-              </button>
-            ) : (
-              onRequestDriveView && (
+            <div className="flex flex-wrap items-center gap-2.5">
+              {canSaveToFirestore && onSaveNoteToFirestore ? (
                 <button
                   type="button"
-                  onClick={onRequestDriveView}
-                  className="inline-flex items-center gap-1.5 font-mono text-[11px] text-[#7e2a1f] hover:underline whitespace-nowrap"
+                  disabled={savingToFirestore}
+                  onClick={handleSaveToFirestore}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] transition-colors whitespace-nowrap shrink-0 disabled:opacity-60"
                 >
-                  <span>Conectar ao Google Drive para arquivar esta ficha</span>
+                  {savingToFirestore ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Database className="w-3.5 h-3.5" />
+                  )}
+                  <span>Salvar ficha no Firestore</span>
                 </button>
-              )
-            )}
+              ) : (
+                onSignInCloud && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void onSignInCloud();
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                  >
+                    <Database className="w-3.5 h-3.5" />
+                    <span>Conectar Firebase para salvar na nuvem</span>
+                  </button>
+                )
+              )}
+
+              {canSaveToDrive && onSaveNoteToDrive ? (
+                <button
+                  type="button"
+                  disabled={savingToDrive}
+                  onClick={handleSaveToDrive}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#7e2a1f] bg-[#7e2a1f] text-[#f2efeb] hover:bg-[#1c1c1c] hover:border-[#1c1c1c] transition-colors whitespace-nowrap shrink-0 disabled:opacity-60"
+                >
+                  {savingToDrive ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <FilePlus2 className="w-3.5 h-3.5" />
+                  )}
+                  <span>Salvar no Google Drive</span>
+                </button>
+              ) : (
+                onRequestDriveView && (
+                  <button
+                    type="button"
+                    onClick={onRequestDriveView}
+                    className="inline-flex items-center gap-1.5 font-mono text-[11px] text-[#7e2a1f] hover:underline whitespace-nowrap"
+                  >
+                    <span>Google Drive</span>
+                  </button>
+                )
+              )}
+            </div>
           </div>
 
           <div className="p-5 bg-[#f2efeb]/80 border border-[#1c1c1c]/20 space-y-3 text-sm leading-relaxed text-[#1c1c1c]/90 whitespace-pre-line max-w-prose">

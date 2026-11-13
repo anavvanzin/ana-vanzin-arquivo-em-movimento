@@ -10,6 +10,8 @@ import {
   X,
 } from 'lucide-react';
 import { getAtlasForSlide, LANGUAGES } from '../data/atlasCatalog';
+import { PORTAL_COPY } from '../data/portalCopy';
+import { WORKSPACE_CONSTRAINTS } from '../firebase';
 import { AtlasEntry, DeckId, LangCode, SlideItem, UIStrings } from '../types';
 
 interface PresenterStageProps {
@@ -53,6 +55,7 @@ export function PresenterStage({
   const current = slides[safeIndex];
   const nextSlide = safeIndex < slides.length - 1 ? slides[safeIndex + 1] : null;
   const linkedAtlas = getAtlasForSlide(deck, safeIndex);
+  const copy = PORTAL_COPY[lang] || PORTAL_COPY.pt;
 
   useEffect(() => {
     if (!isRunning) return;
@@ -113,7 +116,7 @@ export function PresenterStage({
       <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-3.5 border-b border-[#f2efeb]/20 bg-[#151515]">
         <div className="flex items-center gap-4">
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#e5988b]">
-            MODO APRESENTADOR
+            {copy.stageModeTitle}
           </span>
           <span aria-hidden="true" className="text-[#f2efeb]/30">·</span>
           <span className="text-xs text-[#f2efeb]/75 truncate max-w-[260px]">
@@ -136,7 +139,7 @@ export function PresenterStage({
             </span>
             {isOverTime && (
               <span className="text-[11px] font-mono text-[#e5988b] ml-1">
-                (tempo excedido)
+                {copy.overTimeWarning}
               </span>
             )}
 
@@ -209,7 +212,7 @@ export function PresenterStage({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] bg-[#262626] hover:bg-[#7e2a1f] border border-[#f2efeb]/35 text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
           >
             <X className="w-3.5 h-3.5" />
-            <span>Sair do palco</span>
+            <span>{copy.exitStageBtn}</span>
           </button>
         </div>
       </div>
@@ -231,7 +234,7 @@ export function PresenterStage({
           <div className="space-y-6">
             <div className="flex items-center justify-between gap-4 border-b border-[#f2efeb]/15 pb-4">
               <span className="font-mono text-sm tabular-nums text-[#e5988b]">
-                SLIDE {String(safeIndex + 1).padStart(2, '0')} /{' '}
+                {ui.number.toUpperCase()} {String(safeIndex + 1).padStart(2, '0')} /{' '}
                 {String(slides.length).padStart(2, '0')}
               </span>
 
@@ -242,7 +245,7 @@ export function PresenterStage({
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider bg-[#1c1c1c] hover:bg-[#7e2a1f] border border-[#f2efeb]/35 text-[#f2efeb] transition-colors"
                 >
                   <Expand className="w-3.5 h-3.5" />
-                  <span>Projetar prancha ({linkedAtlas.length}) · tecla Z</span>
+                  <span>{copy.projectPlateBtn(linkedAtlas.length)}</span>
                 </button>
               )}
             </div>
@@ -293,7 +296,7 @@ export function PresenterStage({
               </button>
 
               <span className="text-xs font-mono text-[#f2efeb]/50 hidden sm:inline">
-                Espaço ou → avança · ← recua
+                {copy.stageKeyHint}
               </span>
 
               <button
@@ -314,7 +317,7 @@ export function PresenterStage({
           {/* Next Slide Card */}
           <div className="p-5 bg-[#232323] border border-[#f2efeb]/25 space-y-2.5">
             <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-[#f2efeb]/60">
-              <span>PRÓXIMO SLIDE</span>
+              <span>{copy.nextSlideHeading}</span>
               {nextSlide && (
                 <span className="tabular-nums">
                   {String(safeIndex + 2).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
@@ -332,9 +335,7 @@ export function PresenterStage({
                 </p>
               </div>
             ) : (
-              <p className="text-xs italic text-[#f2efeb]/60">
-                Último slide desta apresentação — encerramento e abertura para debate.
-              </p>
+              <p className="text-xs italic text-[#f2efeb]/60">{copy.lastSlideSummary}</p>
             )}
           </div>
 
@@ -345,17 +346,18 @@ export function PresenterStage({
                 htmlFor="presenter-notes-input"
                 className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#e5988b]"
               >
-                Notas de condução oral (Slide {String(safeIndex + 1).padStart(2, '0')})
+                {copy.speakerNotesLabel(String(safeIndex + 1).padStart(2, '0'))}
               </label>
-              <span className="font-mono text-[10px] text-[#f2efeb]/50">Salvo automaticamente</span>
+              <span className="font-mono text-[10px] text-[#f2efeb]/50">{copy.autosavedBadge}</span>
             </div>
 
             <textarea
               id="presenter-notes-input"
               value={presenterNote}
+              maxLength={WORKSPACE_CONSTRAINTS.MAX_PRESENTER_NOTE_LEN}
               onChange={(e) => onSavePresenterNote(e.target.value)}
               rows={9}
-              placeholder="Escreva lembretes de fala, ênfases conceituais, tempo estimado ou referências para responder à banca..."
+              placeholder={copy.speakerNotesPlaceholder}
               className="flex-1 w-full bg-[#1c1c1c] text-[#f2efeb] border border-[#f2efeb]/20 p-3.5 text-sm leading-relaxed focus:outline-none focus:border-[#e5988b] resize-y"
             />
           </div>

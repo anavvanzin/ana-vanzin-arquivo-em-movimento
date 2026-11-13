@@ -190,7 +190,7 @@
     "pt": {
       "editionTitle": "Sobre esta edição",
       "edition": [
-        "Este site de trabalho adapta os 14 slides do trajeto a partir do JSON fornecido. A comunicação temática, com 13 slides, é uma versão revista do HTML à luz do cotejo recebido. O PDF, o PowerPoint e o roteiro anteriores permanecem variantes de referência; não fixam a versão canônica. Os originais foram preservados.",
+        "Este site de trabalho apresenta em primeiro lugar a comunicação temática Entre representação e autenticação (13 slides), versão revista do HTML à luz do cotejo recebido, seguida dos 14 slides do percurso de pesquisa adaptados a partir do JSON fornecido. O PDF, o PowerPoint e o roteiro anteriores permanecem variantes de referência; não fixam a versão canônica. Os originais foram preservados.",
         "As cinco edições aguardam aprovação da autora quanto à tradução. As imagens foram omitidas enquanto se conferem identidade, créditos e direitos de uso. Registro documental, teoria e filologia, e hipótese interpretativa permanecem distintos: uma leitura proposta não equivale a um fato documentado."
       ],
       "contributionTitle": "Uma contribuição em investigação",
@@ -251,7 +251,7 @@
     "en": {
       "editionTitle": "About this edition",
       "edition": [
-        "This working site adapts the 14 trajectory slides from the supplied JSON. The 13-slide thematic presentation revises the supplied HTML in light of the accompanying cross-check. The earlier PDF, PowerPoint and script remain reference variants; they do not establish the canonical version. The originals have been preserved.",
+        "This working site leads with the 13-slide thematic paper Between representation and authentication, revised from the supplied HTML in light of the accompanying cross-check, followed by the 14 research-journey slides adapted from the supplied JSON. The earlier PDF, PowerPoint and script remain reference variants; they do not establish the canonical version. The originals have been preserved.",
         "The translations in all five editions await the author’s approval. Images have been omitted while their identities, credits and usage rights are checked. Documentary records, theory and philology, and interpretative hypotheses remain distinct: a proposed reading is not equivalent to a documented fact."
       ],
       "contributionTitle": "A contribution under investigation",
@@ -312,7 +312,7 @@
     "fr": {
       "editionTitle": "À propos de cette édition",
       "edition": [
-        "Ce site de travail adapte les 14 diapositives du parcours à partir du fichier JSON fourni. La communication thématique, en 13 diapositives, révise le HTML à la lumière du dossier de confrontation reçu. Le PDF, le PowerPoint et le texte oral antérieurs restent des variantes de référence ; ils ne fixent pas la version canonique. Les originaux ont été conservés.",
+        "Ce site de travail s’ouvre sur la communication thématique Entre représentation et authentification (13 diapositives), révisée à partir du HTML à la lumière du dossier de confrontation reçu, suivie des 14 diapositives du parcours de recherche adaptées du fichier JSON fourni. Le PDF, le PowerPoint et le texte oral antérieurs restent des variantes de référence ; ils ne fixent pas la version canonique. Les originaux ont été conservés.",
         "Les traductions des cinq éditions attendent l’approbation de l’autrice. Les images ont été omises pendant la vérification de leur identité, de leurs crédits et des droits d’utilisation. Registre documentaire, théorie et philologie, et hypothèse interprétative restent distincts : une lecture proposée n’équivaut pas à un fait documenté."
       ],
       "contributionTitle": "Une contribution en cours d’enquête",
@@ -373,7 +373,7 @@
     "it": {
       "editionTitle": "Su questa edizione",
       "edition": [
-        "Questo sito di lavoro adatta le 14 diapositive del percorso a partire dal JSON fornito. La comunicazione tematica, di 13 diapositive, rivede l’HTML alla luce del confronto ricevuto. Il PDF, il PowerPoint e il testo orale precedenti restano varianti di riferimento; non fissano la versione canonica. Gli originali sono stati conservati.",
+        "Questo sito di lavoro presenta anzitutto la comunicazione tematica Tra rappresentazione e autenticazione (13 diapositive), rivista dall’HTML alla luce del confronto ricevuto, seguita dalle 14 diapositive del percorso di ricerca adattate dal JSON fornito. Il PDF, il PowerPoint e il testo orale precedenti restano varianti di riferimento; non fissano la versione canonica. Gli originali sono stati conservati.",
         "Le traduzioni delle cinque edizioni attendono l’approvazione dell’autrice. Le immagini sono state omesse mentre se ne verificano identità, crediti e diritti d’uso. Registro documentale, teoria e filologia, e ipotesi interpretativa restano distinti: una lettura proposta non equivale a un fatto documentato."
       ],
       "contributionTitle": "Un contributo in corso di indagine",
@@ -434,7 +434,7 @@
     "nl": {
       "editionTitle": "Over deze editie",
       "edition": [
-        "Deze werksite bewerkt de 14 dia’s over het onderzoekstraject op basis van het aangeleverde JSON-bestand. De thematische presentatie van 13 dia’s herziet de HTML aan de hand van de aangeleverde vergelijking. De eerdere PDF, PowerPoint en spreektekst blijven referentievarianten; zij bepalen niet de canonieke versie. De originelen zijn behouden.",
+        "Deze werksite opent met de thematische voordracht Tussen representatie en authenticatie (13 dia’s), herzien op basis van de HTML en de aangeleverde vergelijking, gevolgd door de 14 dia’s over het onderzoekstraject uit het JSON-bestand. De eerdere PDF, PowerPoint en spreektekst blijven referentievarianten; zij bepalen niet de canonieke versie. De originelen zijn behouden.",
         "De vertalingen van alle vijf edities wachten op goedkeuring door de auteur. Afbeeldingen zijn weggelaten zolang hun identiteit, credits en gebruiksrechten worden gecontroleerd. Documentaire gegevens, theorie en filologie, en interpretatieve hypothesen blijven onderscheiden: een voorgestelde lezing staat niet gelijk aan een gedocumenteerd feit."
       ],
       "contributionTitle": "Een bijdrage in onderzoek",

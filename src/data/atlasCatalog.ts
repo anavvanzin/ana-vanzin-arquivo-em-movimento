@@ -212,6 +212,8 @@ export const DEFAULT_PRESENTER_NOTES: Record<string, string> = {
     'Partir do caso concreto em Florianópolis: o busto de Marianne–République na escadaria do Palácio Cruz e Sousa (MHSC). Sublinhar desde já o cuidado documental com as cotas do IHGSC e os limites da atribuição à Val d’Osne.',
   'representacao:2':
     'Formular a pergunta diretriz com nitidez: representar o Estado equivale a participar de sua autenticação jurídica? Antecipar que semelhança material não gera validade por si só.',
+  'representacao:3':
+    'Mapear os três eixos da circulação França–Brasil (repertório Ripa/Debret, formação francesa de Décio Villares, matéria metálica e fundição). Frisar que cada percurso exige prova documental própria, sem causalidade presumida.',
   'representacao:4':
     'Pausa didática essencial (2 min): distinguir as quatro funções analíticas — Representação, Legitimação, Autenticação e Justificação. Não são estágios evolutivos nem repetem a tríade Fundacional/Normativo/Militar.',
   'representacao:5':
@@ -224,8 +226,88 @@ export const DEFAULT_PRESENTER_NOTES: Record<string, string> = {
     'Entrar nas fontes primárias de dezembro de 1890 (Decreto nº 1.227, art. 10): moedas francesas de ouro de 20 e 10 francos no lastro bancário. Distinguir admissão em depósito metálico, curso legal e tipo iconográfico.',
   'representacao:9':
     'Ponto alto jurídico da comunicação: art. 239 do Código Penal de 1890. A cópia materialmente perfeita fabricada “sem autoridade legitima” é crime. A validade decorre de competência normativa, mas o dispositivo convoca “forma”.',
+  'representacao:10':
+    'Retorno à escadaria de Florianópolis: contrastar selos não antropomórficos (Decreto nº 4/1889), a moeda de 1.000 réis de 1906 e o busto palaciano, evitando anacronismos com o Código Civil de 1916 e o sufrágio de 1932.',
   'representacao:11':
     'Critério de falseabilidade da própria hipótese: explicitar que achados empíricos obrigariam a reformular ou abandonar a explicação proposta.',
   'representacao:12':
     'Fecho bibliográfico e agradecimento (1 min). Destacar diálogo com Agulhon, Warner, Landes, José Murilo de Carvalho, Lima Junior e pesquisadoras do acervo catarinense.',
 };
+
+const DEFAULT_PRESENTER_NOTES_EN: Record<string, string> = {
+  'representacao:0':
+    'Opening (1 min 30 s) — Saberes França–Brasil 2026. Frame this paper’s 1822–1906 chronological window within the broader dissertation scope (Brazil, 1822–1922). Note that this is an authorial working edition.',
+  'representacao:1':
+    'Anchor the talk in Florianópolis: the Marianne–République bust at the foot of the stairs in Palácio Cruz e Sousa (MHSC). Distinguish attribution of manufacture (Val d’Osne) from undocumented acquisition routes, and flag the IHGSC photograph shelfmarks.',
+  'representacao:2':
+    'State the central research question clearly: when a female allegory represents State authority, does she also participate in its legal authentication? Emphasise that material resemblance alone never establishes legal validity.',
+  'representacao:3':
+    'Outline the three registers of France–Brazil circulation: iconographic repertoire (Ripa / Debret), artistic training (Décio Villares), and material objects/specie (palace bust and French gold coin). Each trajectory requires independent archival proof.',
+  'representacao:4':
+    'Key analytical pause (2 min): distinguish the four analytical functions — Representation, Legitimation, Authentication, and Justification. Stress that these are analytical lenses, not developmental stages.',
+  'representacao:5':
+    'Optional live inspection: press Z to project Brant (1494), Gieng (1543), and Ripa (1593/1603) on the Light Table. Insist on situated comparison rather than a linear teleology of the blindfold.',
+  'representacao:6':
+    'Introduce the Zwischenraum working hypothesis with methodological restraint: juxtaposing female personification and women’s legal incapacities raises a historical problem, not an automatic proof of compensation.',
+  'representacao:7':
+    'Debret case study: separate the 1822 coronation staging (predating the 1824 Imperial Constitution) from the 1839 Paris publication of Voyage pittoresque (vol. III, pl. 49). Note pending direct verification of locators.',
+  'representacao:8':
+    'Move to verified primary legislation: Decree no. 1,227 of 30 December 1890 (annexed statutes, art. 10), admitting French 20- and 10-franc gold coins into banking metallic reserves. Separate reserve eligibility from general legal tender.',
+  'representacao:9':
+    'Core legal pivot: Article 239 of the 1890 Brazilian Penal Code (“sem autoridade legitima” / “without legitimate authority”). Even a coin matching genuine material, form, weight, and intrinsic value is unlawful without legal authorisation.',
+  'representacao:10':
+    'Return to the palace stairs: contrast non-anthropomorphic seals (Decree no. 4/1889), the 1906 1,000-réis Republic effigy, and the MHSC bust, avoiding retroactive projection from the 1916 Civil Code or 1932 suffrage.',
+  'representacao:11':
+    'Falsifiability conditions: state explicitly what archival counterexamples (gender substitution, simultaneous legal inclusion, or purely formal variation) would require revising the hypothesis.',
+  'representacao:12':
+    'Closing acknowledgements (1 min): situate the dialogue with Agulhon, Warner, Landes, Carvalho, Lima Junior, and Santa Catarina museum scholarship (Makowiecky; Malossi & Bononi).',
+  'trajeto:0':
+    'Calm opening (1 min): introduce the first-year doctoral trajectory at PPGD/UFSC through the methodological assumptions abandoned when tested against primary sources.',
+  'trajeto:9':
+    'Highlight Article 239 of the 1890 Penal Code (“without lawful authority”): the decisive shift from purely visual resemblance to legal competence of issuance.',
+};
+
+const DEFAULT_PRESENTER_NOTES_FR: Record<string, string> = {
+  'representacao:0':
+    'Ouverture (1 min 30) — Colloque Saberes França–Brasil 2026. Situer la coupe chronologique de cette communication (1822–1906) au sein de la thèse (Brésil, 1822–1922). Préciser qu’il s’agit d’une édition de travail.',
+  'representacao:1':
+    'Partir du cas concret à Florianópolis : le buste Marianne–République au pied de l’escalier du Palácio Cruz e Sousa (MHSC). Distinguer l’attribution de fonte (Val d’Osne) du circuit d’achat non documenté et signaler la vérification des cotes IHGSC.',
+  'representacao:2':
+    'Poser nettement la question directrice : lorsqu’une allégorie féminine représente l’autorité de l’État, participe-t-elle aussi à son authentification juridique ? La seule ressemblance matérielle ne fonde pas la validité.',
+  'representacao:3':
+    'Distinguer trois registres de circulation France–Brésil : répertoire (Ripa / Debret), formation artistique (Décio Villares) et matière métallique (buste palatial et monnaies d’or françaises). Chaque parcours exige ses propres preuves.',
+  'representacao:4':
+    'Pause conceptuelle essentielle (2 min) : distinguer Représentation, Légitimation, Authentification et Justification comme quatre fonctions analytiques, sans les confondre avec des étapes historiques.',
+  'representacao:5':
+    'Si opportun, appuyer sur Z pour ouvrir la Table lumineuse et confronter Brant (1494), Gieng (1543) et Ripa (1593/1603). Souligner qu’il s’agit d’une comparaison située, non d’une évolution linéaire du bandeau.',
+  'representacao:6':
+    'Présenter l’hypothèse du Zwischenraum avec rigueur : la tension entre figure féminine et statut juridique des femmes ouvre une enquête documentaire précise, sans prouver d’emblée un mécanisme compensatoire.',
+  'representacao:7':
+    'Cas Debret : dissocier la scène de 1822 (antérieure à la Constitution de 1824) de sa publication parisienne en 1839 (Voyage pittoresque, t. III, pl. 49). Mentionner la vérification en cours des références secondaires.',
+  'representacao:8':
+    'Source primaire vérifiée : Décret nº 1.227 du 30 décembre 1890 (statuts annexés, art. 10) admettant les pièces d’or françaises de 20 et 10 francs dans l’encaisse métallique. Distinguer garantie d’émission, cours légal et type iconographique.',
+  'representacao:9':
+    'Pivot juridique de la communication : l’article 239 du Code pénal brésilien de 1890 (« sem autoridade legitima » / « sans autorité légitime »). Même l’équivalence parfaite de matière, forme et poids demeure illicite sans compétence légale.',
+  'representacao:10':
+    'Retour à l’escalier du palais : mettre en regard les sceaux (Décret nº 4/1889), l’effigie de 1 000 réis de 1906 et le buste du MHSC, sans projeter rétroactivement le Code civil de 1916 ni le suffrage de 1932.',
+  'representacao:11':
+    'Conditions de réfutabilité : expliciter quels contre-exemples empiriques imposeraient de modifier l’explication proposée plutôt que d’être simplement absorbés par elle.',
+  'representacao:12':
+    'Conclusion et remerciements (1 min) : rappeler le dialogue avec Agulhon, Warner, Landes, Carvalho, Lima Junior et les travaux sur le patrimoine de Santa Catarina.',
+  'trajeto:0':
+    'Ouverture posée (1 min) : présenter le bilan méthodologique de première année de doctorat à l’UFSC à partir des hypothèses abandonnées face aux sources.',
+  'trajeto:9':
+    'Insister sur l’article 239 du Code pénal de 1890 (« sans autorité légitime ») : déplacement décisif de la ressemblance formelle vers l’habilitation juridique.',
+};
+
+export function getDefaultPresenterNote(deck: DeckId, index: number, lang: LangCode = 'pt'): string {
+  const key = `${deck}:${index}`;
+  if (lang === 'en' && DEFAULT_PRESENTER_NOTES_EN[key]) {
+    return DEFAULT_PRESENTER_NOTES_EN[key];
+  }
+  if (lang === 'fr' && DEFAULT_PRESENTER_NOTES_FR[key]) {
+    return DEFAULT_PRESENTER_NOTES_FR[key];
+  }
+  return DEFAULT_PRESENTER_NOTES[key] || '';
+}
+

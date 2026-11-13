@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { User } from 'firebase/auth';
-import { Cloud, Menu, X } from 'lucide-react';
+import { CheckCircle2, Cloud, Database, LogOut, Menu, X } from 'lucide-react';
 import { AtlasGallery } from './components/AtlasGallery';
 import { DriveWorkspace } from './components/DriveWorkspace';
 import { EditorialApparatus } from './components/EditorialApparatus';
@@ -16,6 +16,7 @@ import { buildGroundedNoteHtml } from './components/ResearchGroundingPanel';
 import { SlideReader } from './components/SlideReader';
 import { TranslationStudio } from './components/TranslationStudio';
 import { LANGUAGES } from './data/atlasCatalog';
+import { PORTAL_COPY } from './data/portalCopy';
 import { useArchiveStore } from './hooks/useArchiveStore';
 import {
   findDriveFolderByName,
@@ -35,7 +36,7 @@ interface RouteState {
 }
 
 const VALID_LANGS: LangCode[] = ['pt', 'en', 'fr', 'it', 'nl'];
-const VALID_DECKS: DeckId[] = ['trajeto', 'representacao'];
+const VALID_DECKS: DeckId[] = ['representacao', 'trajeto'];
 
 function parseRouteFromLocation(): RouteState {
   const hash = window.location.hash.replace(/^#/, '');
@@ -125,6 +126,7 @@ export default function App() {
   const [driveUser, setDriveUser] = useState<User | null>(null);
   const [needsDriveAuth, setNeedsDriveAuth] = useState<boolean>(true);
   const [isSigningInDrive, setIsSigningInDrive] = useState<boolean>(false);
+  const [isSigningInCloud, setIsSigningInCloud] = useState<boolean>(false);
   const noticeTimer = useRef<number | null>(null);
 
   const notify = useCallback((msg: string) => {
@@ -153,6 +155,26 @@ export default function App() {
       unsubStore();
     };
   }, []);
+
+  const handleCloudSignIn = useCallback(async () => {
+    setIsSigningInCloud(true);
+    try {
+      const user = await store.signInCloudSync();
+      notify(`Sincronização Firestore conectada (${user.email || 'Google'}).`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Autenticação Google cancelada.';
+      notify(msg);
+    } finally {
+      setIsSigningInCloud(false);
+    }
+  }, [notify, store]);
+
+  const handleCloudSignOut = useCallback(async () => {
+    await store.signOutCloudSync();
+    setDriveUser(null);
+    setNeedsDriveAuth(true);
+    notify('Sessão Firebase encerrada.');
+  }, [notify, store]);
 
   const handleDriveSignIn = useCallback(async () => {
     setIsSigningInDrive(true);
@@ -200,6 +222,18 @@ export default function App() {
     [notify]
   );
 
+  const handleSaveGroundedNoteToFirestore = useCallback(
+    async (
+      queryTitle: string,
+      synthesis: string,
+      sources: { title: string; uri: string }[]
+    ) => {
+      await store.saveResearchNoteToFirestore(queryTitle, synthesis, sources, route.deck);
+      notify('Ficha documental arquivada no Firestore.');
+    },
+    [notify, route.deck, store]
+  );
+
   const navigateState = useCallback((next: RouteState) => {
     setRoute(next);
     setMobileMenuOpen(false);
@@ -225,6 +259,7 @@ export default function App() {
   const activeUi = store.uiByLang[route.lang] || store.uiByLang.pt;
   const activeEditorial = store.editorialByLang[route.lang] || store.editorialByLang.pt;
   const activeSlides = store.getMergedSlides(route.deck, route.lang);
+  const copy = PORTAL_COPY[route.lang] || PORTAL_COPY.pt;
 
   useEffect(() => {
     document.documentElement.lang = route.lang === 'pt' ? 'pt-BR' : route.lang;
@@ -260,7 +295,7 @@ export default function App() {
             className="no-print hidden lg:flex w-20 shrink-0 border-r-[1.5px] border-[#1c1c1c] items-center justify-center py-8"
           >
             <span className="sticky top-1/2 -translate-y-1/2 [writing-mode:vertical-rl] font-mono text-[11px] tracking-[0.5em] uppercase text-[#1c1c1c]/60 whitespace-nowrap select-none">
-              HISTÓRIA DO DIREITO — UFSC — 2026
+              {copy.railTitle}
             </span>
           </aside>
         )}
@@ -295,7 +330,7 @@ export default function App() {
                       : 'border-transparent hover:text-[#1c1c1c]'
                   }`}
                 >
-                  Apresentações
+                  {copy.navPresentations}
                 </button>
 
                 <button
@@ -307,7 +342,7 @@ export default function App() {
                       : 'border-transparent hover:text-[#1c1c1c]'
                   }`}
                 >
-                  Atlas
+                  {copy.navAtlas}
                 </button>
 
                 <button
@@ -319,7 +354,7 @@ export default function App() {
                       : 'border-transparent hover:text-[#1c1c1c]'
                   }`}
                 >
-                  Traduções
+                  {copy.navTranslations}
                 </button>
 
                 <button
@@ -331,7 +366,7 @@ export default function App() {
                       : 'border-transparent hover:text-[#1c1c1c]'
                   }`}
                 >
-                  Fontes & Glossário
+                  {copy.navSources}
                 </button>
 
                 <button
@@ -343,7 +378,7 @@ export default function App() {
                       : 'border-transparent hover:text-[#1c1c1c]'
                   }`}
                 >
-                  Google Drive
+                  {copy.navDrive}
                 </button>
               </nav>
 
@@ -359,7 +394,7 @@ export default function App() {
                   }
                   className="px-4 py-2 font-mono text-[11px] uppercase tracking-[0.1em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
                 >
-                  {route.view === 'presenter' ? 'Voltar ao Leitor' : 'Modo Apresentador'}
+                  {route.view === 'presenter' ? copy.backToReaderCta : copy.presenterCta}
                 </button>
 
                 <button
@@ -385,46 +420,46 @@ export default function App() {
                   onClick={() => navigateState({ ...route, view: 'home' })}
                   className="text-left py-1 font-bold text-[#1c1c1c]"
                 >
-                  Apresentações
+                  {copy.navPresentations}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigateState({ ...route, view: 'atlas' })}
                   className="text-left py-1 text-[#1c1c1c]/80"
                 >
-                  Atlas Iconográfico
+                  {copy.navAtlas}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigateState({ ...route, view: 'studio' })}
                   className="text-left py-1 text-[#1c1c1c]/80"
                 >
-                  Estúdio de Traduções
+                  {copy.navTranslations}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigateState({ ...route, view: 'apparatus' })}
                   className="text-left py-1 text-[#1c1c1c]/80"
                 >
-                  Fontes & Glossário
+                  {copy.navSources}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigateState({ ...route, view: 'drive' })}
                   className="text-left py-1 text-[#1c1c1c]/80"
                 >
-                  Acervo Google Drive
+                  {copy.navDrive}
                 </button>
               </nav>
             )}
           </header>
 
-          {/* Fixed Light Paper Utility Strip (Languages + Drive only, Dark Mode Removed) */}
+          {/* Fixed Light Paper Utility Strip (Languages + Firestore Cloud Sync + Drive) */}
           {!isPresenter && (
             <div className="no-print border-b border-[#1c1c1c]/15 bg-white/35 backdrop-blur-[3px]">
               <div className="max-w-[1440px] mx-auto px-6 lg:px-10 py-2 flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] text-[#1c1c1c]/70">
                 <div className="flex items-center gap-2">
-                  <span className="uppercase tracking-[0.12em]">Idioma:</span>
+                  <span className="uppercase tracking-[0.12em]">{copy.langBarLabel}</span>
                   {LANGUAGES.map((l, i) => (
                     <span key={l.code} className="inline-flex items-center">
                       {i > 0 && (
@@ -447,7 +482,41 @@ export default function App() {
                   ))}
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-4">
+                  {/* Firestore Cloud Sync Auth Toggle */}
+                  {store.cloudSyncActive && store.firebaseUser ? (
+                    <div className="inline-flex items-center gap-2 text-[#14532d]">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate max-w-[180px]">
+                        Firestore: {store.firebaseUser.displayName || 'ativo'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleCloudSignOut}
+                        title="Encerrar sincronização Firebase"
+                        className="inline-flex items-center gap-1 text-[#1c1c1c]/65 hover:text-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+                      >
+                        <LogOut className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isSigningInCloud}
+                      onClick={handleCloudSignIn}
+                      className="inline-flex items-center gap-1.5 hover:text-[#7e2a1f] transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
+                    >
+                      <Database className="w-3.5 h-3.5" />
+                      <span>
+                        {isSigningInCloud ? 'Autenticando...' : 'Sincronizar Firebase'}
+                      </span>
+                    </button>
+                  )}
+
+                  <span aria-hidden="true" className="text-[#1c1c1c]/25">
+                    ·
+                  </span>
+
                   <button
                     type="button"
                     onClick={() => navigateState({ ...route, view: 'drive' })}
@@ -456,8 +525,8 @@ export default function App() {
                     <Cloud className="w-3.5 h-3.5" />
                     <span>
                       {needsDriveAuth
-                        ? 'Conectar Google Drive'
-                        : `Drive: ${driveUser?.email || 'conectado'}`}
+                        ? copy.connectDriveLabel
+                        : `Drive: ${driveUser?.email || copy.driveConnectedFallback}`}
                     </span>
                   </button>
                 </div>
@@ -473,6 +542,7 @@ export default function App() {
                 ui={activeUi}
                 editorial={activeEditorial}
                 getReviewStats={store.getDeckReviewStats}
+                onChangeLang={(nextLang) => navigateState({ ...route, lang: nextLang })}
                 onOpenDeck={(deck, lang, slideIndex = 0) =>
                   navigateState({ view: 'reader', deck, lang, slideIndex })
                 }
@@ -518,9 +588,9 @@ export default function App() {
                 slideIndex={route.slideIndex}
                 slides={activeSlides}
                 ui={activeUi}
-                presenterNote={store.getPresenterNote(route.deck, route.slideIndex)}
+                presenterNote={store.getPresenterNote(route.deck, route.slideIndex, route.lang)}
                 onSavePresenterNote={(note) =>
-                  store.setPresenterNote(route.deck, route.slideIndex, note)
+                  store.setPresenterNote(route.deck, route.slideIndex, note, route.lang)
                 }
                 onChangeSlide={(idx) => navigateState({ ...route, slideIndex: idx })}
                 onChangeLang={(nextLang) => navigateState({ ...route, lang: nextLang })}
@@ -548,6 +618,8 @@ export default function App() {
                 initialLang={route.lang}
                 initialSlideIndex={route.slideIndex}
                 ui={activeUi}
+                cloudSyncActive={store.cloudSyncActive}
+                onSignInCloud={handleCloudSignIn}
                 getMergedSlides={store.getMergedSlides}
                 getSlideOverride={store.getSlideOverride}
                 isSlideModified={store.isSlideModified}
@@ -571,7 +643,12 @@ export default function App() {
                 editorial={activeEditorial}
                 ui={activeUi}
                 canSaveToDrive={!needsDriveAuth}
+                canSaveToFirestore={store.cloudSyncActive}
+                savedFirestoreNotes={store.savedResearchNotes}
                 onSaveNoteToDrive={handleSaveGroundedNoteFromApparatus}
+                onSaveNoteToFirestore={handleSaveGroundedNoteToFirestore}
+                onDeleteFirestoreNote={store.deleteResearchNoteFromFirestore}
+                onSignInCloud={handleCloudSignIn}
                 onOpenDriveView={() => navigateState({ ...route, view: 'drive' })}
                 onNotify={notify}
                 onChangeLang={(nextLang) => navigateState({ ...route, lang: nextLang })}
@@ -588,7 +665,7 @@ export default function App() {
                 onSignIn={handleDriveSignIn}
                 onSignOut={handleDriveSignOut}
                 getMergedSlides={store.getMergedSlides}
-                getPresenterNote={store.getPresenterNote}
+                getPresenterNote={(deck, idx) => store.getPresenterNote(deck, idx, route.lang)}
                 buildDeckExportJson={store.buildDeckExportJson}
                 buildWorkspaceBackupJson={store.buildWorkspaceBackupJson}
                 onImportJson={store.importWorkspaceJson}
@@ -623,12 +700,12 @@ export default function App() {
                 onClick={() => navigateState({ ...route, view: 'studio' })}
                 className="hover:text-[#7e2a1f] hover:underline whitespace-nowrap"
               >
-                Estúdio
+                {copy.footerStudio}
               </button>
             </div>
 
             <span className="border border-[#7e2a1f] text-[#7e2a1f] px-2.5 py-0.5 rounded-[4px] whitespace-nowrap shrink-0">
-              ARQUIVO EM MOVIMENTO
+              {copy.footerStamp}
             </span>
 
             <span className="text-[#1c1c1c]/80">ICONOCRACIA © VANZIN MENDES</span>

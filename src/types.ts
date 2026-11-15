@@ -6,13 +6,10 @@ export type ViewMode =
   | 'home'
   | 'reader'
   | 'presenter'
-  | 'slides'
-  | 'docs'
   | 'atlas'
   | 'cabinet3d'
   | 'studio'
-  | 'apparatus'
-  | 'drive';
+  | 'apparatus';
 
 export type ReviewStatus = 'pending' | 'approved';
 

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-serif: "Cormorant Garamond", Georgia, Cambria, "Times New Roman", serif;
@@ -15,6 +16,18 @@
   --surface-veil: rgba(255, 255, 255, 0.45);
   --surface-card: rgba(255, 255, 255, 0.72);
   --verified: #14532d;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0d0d0d;
+  --ink: #f2efeb;
+  --accent: #e5988b;
+  --ink-faint: rgba(242, 239, 235, 0.08);
+  --surface-veil: rgba(24, 24, 24, 0.78);
+  --surface-card: rgba(28, 28, 28, 0.92);
+  --verified: #6ee7b7;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -31,6 +44,10 @@
     background-size: 32px 32px;
     color: var(--ink);
     -webkit-font-smoothing: antialiased;
+  }
+
+  .dark body {
+    letter-spacing: 0.005em;
   }
 
   h1, h2, h3, .font-editorial {

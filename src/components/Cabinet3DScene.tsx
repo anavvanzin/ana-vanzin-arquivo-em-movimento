@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowUpRight,
+  BookmarkPlus,
   Camera,
   ChevronDown,
   ChevronUp,
-  Database,
   Expand,
   RotateCcw,
 } from 'lucide-react';
@@ -22,7 +22,6 @@ import {
 import { AtlasAxis, AtlasEntry, DeckId } from '../types';
 
 interface Cabinet3DSceneProps {
-  canSaveToFirestore: boolean;
   savedSpatialRecords: SavedAtelierRecord[];
   onSaveSpatialRecord: (input: {
     kind: 'image_plate' | 'spatial_view';
@@ -31,7 +30,6 @@ interface Cabinet3DSceneProps {
     axis: AtlasAxis;
     specSummary: string;
   }) => Promise<string>;
-  onSignInCloud: () => void;
   onOpenLightbox: (entry: AtlasEntry) => void;
   onJumpToSlide: (deck: DeckId, slideIndex: number) => void;
   onExitCabinet: () => void;
@@ -52,10 +50,8 @@ const FINISH_BUTTONS: { id: CabinetFinishPreset; label: string }[] = [
 ];
 
 export function Cabinet3DScene({
-  canSaveToFirestore,
   savedSpatialRecords,
   onSaveSpatialRecord,
-  onSignInCloud,
   onOpenLightbox,
   onJumpToSlide,
   onExitCabinet,
@@ -169,7 +165,7 @@ export function Cabinet3DScene({
         axis: activeSpec.axis,
         specSummary,
       });
-      onNotify('Vista espacial arquivada no Firestore.');
+      onNotify('Vista espacial salva no caderno local.');
     } catch (err: unknown) {
       onNotify(err instanceof Error ? err.message : 'Falha ao arquivar vista espacial.');
     } finally {
@@ -188,29 +184,29 @@ export function Cabinet3DScene({
     <div
       role="region"
       aria-label="Gabinete Espacial 3D de Iconologia e Autoridade Jurídica"
-      className="fixed inset-0 z-40 w-screen h-screen overflow-hidden bg-[#e9e4db] text-[#1c1c1c] select-none"
+      className="fixed inset-0 z-40 w-screen h-screen overflow-hidden bg-[#e9e4db] dark:bg-[#0d0d0d] text-[#1c1c1c] dark:text-[#f2efeb] select-none"
     >
       {/* Isolated WebGL Canvas Mount Container (Strictly Outside Sibling HUD Elements) */}
       <div ref={canvasMountRef} className="absolute inset-0 w-full h-full" />
 
       {/* Fallback Banner ONLY if WebGL Context is Unavailable or Lost */}
       {contextLost && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center p-6 bg-[#f2efeb]">
-          <div className="max-w-md p-6 bg-white border border-[#1c1c1c] space-y-3 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#7e2a1f]">
+        <div className="absolute inset-0 z-20 flex items-center justify-center p-6 bg-[#f2efeb] dark:bg-[#0d0d0d]">
+          <div className="max-w-md p-6 bg-white dark:bg-[#161616] border border-[#1c1c1c] dark:border-[#f2efeb]/65 space-y-3 text-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#7e2a1f] dark:text-[#e5988b]">
               GABINETE ESPACIAL · MODO DE SEGURANÇA
             </p>
-            <h2 className="font-serif text-2xl text-[#1c1c1c]">
+            <h2 className="font-serif text-2xl text-[#1c1c1c] dark:text-[#f2efeb]">
               Contexto gráfico 3D temporariamente suspenso
             </h2>
-            <p className="text-xs leading-relaxed text-[#1c1c1c]/80">
+            <p className="text-xs leading-relaxed text-[#1c1c1c]/80 dark:text-[#f2efeb]/85">
               Você pode retornar ao catálogo bidimensional e abrir qualquer prancha na mesa de luz
               com zoom de até 400%.
             </p>
             <button
               type="button"
               onClick={onExitCabinet}
-              className="inline-flex items-center gap-2 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.12em] border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-2 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.12em] border border-[#1c1c1c] dark:border-[#f2efeb] bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d] whitespace-nowrap shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Voltar ao Atlas</span>
@@ -221,24 +217,24 @@ export function Cabinet3DScene({
 
       {/* Minimal Top-Left Navigation & Title Strip (No backdrop-filter over WebGL) */}
       <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between gap-4 pointer-events-none">
-        <div className="pointer-events-auto inline-flex items-center gap-3 px-3.5 py-2 bg-[#f2efeb] border border-[#1c1c1c]">
+        <div className="pointer-events-auto inline-flex items-center gap-3 px-3.5 py-2 bg-[#f2efeb] dark:bg-[#161616] border border-[#1c1c1c] dark:border-[#f2efeb]/65">
           <button
             type="button"
             onClick={onExitCabinet}
-            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[#1c1c1c] hover:text-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[#1c1c1c] dark:text-[#f2efeb] hover:text-[#7e2a1f] dark:hover:text-[#e5988b] transition-colors whitespace-nowrap shrink-0"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Voltar ao Atlas</span>
           </button>
-          <span aria-hidden="true" className="text-[#1c1c1c]/30">
+          <span aria-hidden="true" className="text-[#1c1c1c]/30 dark:text-[#f2efeb]/35">
             ·
           </span>
-          <span className="font-serif text-base sm:text-lg font-medium text-[#1c1c1c] truncate max-w-[260px] sm:max-w-none">
+          <span className="font-serif text-base sm:text-lg font-medium text-[#1c1c1c] dark:text-[#f2efeb] truncate max-w-[260px] sm:max-w-none">
             Gabinete Espacial 3D (1494–1906)
           </span>
         </div>
 
-        <div className="hidden md:inline-flex pointer-events-auto items-center gap-2 px-3 py-1.5 bg-[#f2efeb] border border-[#1c1c1c]/60 font-mono text-[10px] uppercase tracking-[0.1em] text-[#1c1c1c]/75">
+        <div className="hidden md:inline-flex pointer-events-auto items-center gap-2 px-3 py-1.5 bg-[#f2efeb] dark:bg-[#161616] border border-[#1c1c1c]/60 dark:border-[#f2efeb]/50 font-mono text-[10px] uppercase tracking-[0.1em] text-[#1c1c1c]/75 dark:text-[#f2efeb]/80">
           <span>Arraste para orbitar</span>
           <span aria-hidden="true">·</span>
           <span>Clique em um modelo</span>
@@ -258,7 +254,7 @@ export function Cabinet3DScene({
           <button
             type="button"
             onClick={() => setDockCollapsed((v) => !v)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-[#1c1c1c] text-[#f2efeb] font-mono text-[10px] uppercase tracking-[0.12em] border border-b-0 border-[#1c1c1c] hover:bg-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d] font-mono text-[10px] uppercase tracking-[0.12em] border border-b-0 border-[#1c1c1c] dark:border-[#f2efeb] hover:bg-[#7e2a1f] dark:hover:bg-[#e5988b] transition-colors whitespace-nowrap shrink-0"
           >
             {dockCollapsed ? (
               <>
@@ -275,25 +271,25 @@ export function Cabinet3DScene({
         </div>
 
         {/* Main Compact Dock Body */}
-        <div className="p-3.5 sm:p-4 bg-[#f2efeb] border-[1.5px] border-[#1c1c1c] space-y-3">
+        <div className="p-3.5 sm:p-4 bg-[#f2efeb] dark:bg-[#161616] border-[1.5px] border-[#1c1c1c] dark:border-[#f2efeb]/70 space-y-3">
           {/* Row 1: Active Artifact Analytical Readout + Cross-Links */}
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1c1c1c]/15 pb-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 pb-2.5">
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-[#7e2a1f] tabular-nums">
+              <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-[#7e2a1f] dark:text-[#e5988b] tabular-nums">
                 <span className="font-bold">{activeSpec.accessionCode}</span>
                 <span aria-hidden="true">·</span>
                 <span>{activeSpec.yearRange}</span>
                 <span aria-hidden="true">·</span>
-                <span className="text-[#1c1c1c] font-semibold truncate">{activeSpec.title}</span>
+                <span className="text-[#1c1c1c] dark:text-[#f2efeb] font-semibold truncate">{activeSpec.title}</span>
               </div>
-              <p className="text-xs text-[#1c1c1c]/80 truncate mt-0.5">{activeSpec.juridicalNote}</p>
+              <p className="text-xs text-[#1c1c1c]/80 dark:text-[#f2efeb]/85 truncate mt-0.5">{activeSpec.juridicalNote}</p>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={handleOpen2DPlate}
-                className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] border border-[#1c1c1c]/45 text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] border border-[#1c1c1c]/45 dark:border-[#f2efeb]/50 text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
               >
                 <Expand className="w-3 h-3" />
                 <span>Prancha 2D</span>
@@ -301,7 +297,7 @@ export function Cabinet3DScene({
               <button
                 type="button"
                 onClick={() => onJumpToSlide(activeSpec.linkedDeck, activeSpec.linkedSlideIndex)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] border border-[#7e2a1f] text-[#7e2a1f] hover:bg-[#7e2a1f] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] border border-[#7e2a1f] dark:border-[#e5988b] text-[#7e2a1f] dark:text-[#e5988b] hover:bg-[#7e2a1f] hover:text-[#f2efeb] dark:hover:bg-[#e5988b] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
               >
                 <span>Slide {String(activeSpec.linkedSlideIndex + 1).padStart(2, '0')}</span>
                 <ArrowUpRight className="w-3 h-3" />
@@ -324,8 +320,8 @@ export function Cabinet3DScene({
                   onClick={() => handleCameraPreset(cam.id)}
                   className={`px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] border transition-colors whitespace-nowrap shrink-0 ${
                     activePreset === cam.id
-                      ? 'bg-[#1c1c1c] text-[#f2efeb] border-[#1c1c1c]'
-                      : 'bg-white text-[#1c1c1c]/85 border-[#1c1c1c]/35 hover:border-[#1c1c1c]'
+                      ? 'bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d] border-[#1c1c1c] dark:border-[#f2efeb]'
+                      : 'bg-white dark:bg-[#1e1e1e] text-[#1c1c1c]/85 dark:text-[#f2efeb]/85 border-[#1c1c1c]/35 dark:border-[#f2efeb]/40 hover:border-[#1c1c1c] dark:hover:border-[#f2efeb]'
                   }`}
                 >
                   {cam.label}
@@ -334,7 +330,7 @@ export function Cabinet3DScene({
             </div>
 
             {/* Exploded View Slider */}
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[#1c1c1c] shrink-0">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[#1c1c1c] dark:text-[#f2efeb] shrink-0">
               <label htmlFor="cabinet-explode-slider" className="whitespace-nowrap">
                 Vista explodida
               </label>
@@ -346,7 +342,7 @@ export function Cabinet3DScene({
                 step={1}
                 value={explodePct}
                 onChange={(e) => handleExplodeChange(Number(e.target.value))}
-                className="w-24 sm:w-28 accent-[#7e2a1f] cursor-pointer"
+                className="w-24 sm:w-28 accent-[#7e2a1f] dark:accent-[#e5988b] cursor-pointer"
               />
               <span className="w-8 text-right tabular-nums">{explodePct}%</span>
             </div>
@@ -364,8 +360,8 @@ export function Cabinet3DScene({
                   onClick={() => handleFinishChange(fin.id)}
                   className={`px-2 py-1 font-mono text-[10px] border transition-colors whitespace-nowrap shrink-0 ${
                     finishPreset === fin.id
-                      ? 'bg-[#7e2a1f] text-[#f2efeb] border-[#7e2a1f]'
-                      : 'bg-white text-[#1c1c1c]/80 border-[#1c1c1c]/30 hover:border-[#1c1c1c]'
+                      ? 'bg-[#7e2a1f] dark:bg-[#e5988b] text-[#f2efeb] dark:text-[#0d0d0d] border-[#7e2a1f] dark:border-[#e5988b]'
+                      : 'bg-white dark:bg-[#1e1e1e] text-[#1c1c1c]/80 dark:text-[#f2efeb]/85 border-[#1c1c1c]/30 dark:border-[#f2efeb]/35 hover:border-[#1c1c1c] dark:hover:border-[#f2efeb]'
                   }`}
                 >
                   {fin.label}
@@ -379,7 +375,7 @@ export function Cabinet3DScene({
                 type="button"
                 onClick={handleResetScene}
                 title="Restaurar vista inicial"
-                className="inline-flex items-center gap-1 px-2 py-1 font-mono text-[10px] uppercase border border-[#1c1c1c]/40 bg-white text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-1 px-2 py-1 font-mono text-[10px] uppercase border border-[#1c1c1c]/40 dark:border-[#f2efeb]/45 bg-white dark:bg-[#1e1e1e] text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Reset</span>
@@ -389,36 +385,25 @@ export function Cabinet3DScene({
                 type="button"
                 onClick={handleDownloadSnapshot}
                 title="Baixar imagem PNG desta vista 3D"
-                className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase border border-[#1c1c1c] dark:border-[#f2efeb] bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] dark:hover:bg-[#e5988b] dark:hover:border-[#e5988b] transition-colors whitespace-nowrap shrink-0"
               >
                 <Camera className="w-3 h-3" />
                 <span>PNG</span>
               </button>
 
-              {canSaveToFirestore ? (
-                <button
-                  type="button"
-                  disabled={isSavingBookmark}
-                  onClick={handleSaveSpatialBookmark}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase border border-[#7e2a1f] bg-white text-[#7e2a1f] hover:bg-[#7e2a1f] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
-                >
-                  <Database className="w-3 h-3" />
-                  <span>
-                    {isSavingBookmark
-                      ? 'Salvando...'
-                      : `Salvar vista${spatialCount > 0 ? ` (${spatialCount})` : ''}`}
-                  </span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onSignInCloud}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase border border-[#1c1c1c]/40 bg-white text-[#1c1c1c]/80 hover:border-[#1c1c1c] transition-colors whitespace-nowrap shrink-0"
-                >
-                  <Database className="w-3 h-3" />
-                  <span>Sincronizar</span>
-                </button>
-              )}
+              <button
+                type="button"
+                disabled={isSavingBookmark}
+                onClick={handleSaveSpatialBookmark}
+                className="inline-flex items-center gap-1 px-2.5 py-1 font-mono text-[10px] uppercase border border-[#7e2a1f] dark:border-[#e5988b] bg-white dark:bg-[#1e1e1e] text-[#7e2a1f] dark:text-[#e5988b] hover:bg-[#7e2a1f] hover:text-[#f2efeb] dark:hover:bg-[#e5988b] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
+              >
+                <BookmarkPlus className="w-3 h-3" />
+                <span>
+                  {isSavingBookmark
+                    ? 'Salvando...'
+                    : `Salvar vista${spatialCount > 0 ? ` (${spatialCount})` : ''}`}
+                </span>
+              </button>
             </div>
           </div>
         </div>

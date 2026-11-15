@@ -23,6 +23,9 @@ export interface PortalLocaleStrings {
   driveConnectedFallback: string;
   footerStudio: string;
   footerStamp: string;
+  themeToggleLight: string;
+  themeToggleDark: string;
+  themeToggleAria: string;
 
   // HomePortal Lead-In Gateway for DOC. 01 ("Entre representação e autenticação")
   leadKicker: string;
@@ -98,6 +101,9 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     driveConnectedFallback: 'conectado',
     footerStudio: 'Estúdio',
     footerStamp: 'ARQUIVO EM MOVIMENTO',
+    themeToggleLight: 'Tema claro',
+    themeToggleDark: 'Alto contraste',
+    themeToggleAria: 'Alternar esquema de cores entre claro e alto contraste',
 
     leadKicker: 'COMUNICAÇÃO DE ABERTURA · [ DOC. 01 ] · SABERES FRANÇA–BRASIL',
     leadScopeBadge: '13 SLIDES · PT · EN · FR',
@@ -170,6 +176,9 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     driveConnectedFallback: 'connected',
     footerStudio: 'Studio',
     footerStamp: 'ARCHIVE IN MOTION',
+    themeToggleLight: 'Light theme',
+    themeToggleDark: 'High contrast',
+    themeToggleAria: 'Toggle color theme between light and high contrast',
 
     leadKicker: 'OPENING PAPER · [ DOC. 01 ] · SABERES FRANÇA–BRASIL',
     leadScopeBadge: '13 SLIDES · PT · EN · FR',
@@ -242,6 +251,9 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     driveConnectedFallback: 'connecté',
     footerStudio: 'Atelier',
     footerStamp: 'ARCHIVES EN MOUVEMENT',
+    themeToggleLight: 'Thème clair',
+    themeToggleDark: 'Contraste élevé',
+    themeToggleAria: 'Basculer entre le thème clair et le mode contraste élevé',
 
     leadKicker: 'COMMUNICATION D’OUVERTURE · [ DOC. 01 ] · SABERES FRANÇA–BRASIL',
     leadScopeBadge: '13 DIAPOSITIVES · PT · EN · FR',
@@ -314,6 +326,9 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     driveConnectedFallback: 'connesso',
     footerStudio: 'Studio',
     footerStamp: 'ARCHIVIO IN MOVIMENTO',
+    themeToggleLight: 'Tema chiaro',
+    themeToggleDark: 'Alto contrasto',
+    themeToggleAria: 'Alterna il tema tra chiaro e alto contrasto',
 
     leadKicker: 'COMUNICAZIONE D’APERTURA · [ DOC. 01 ] · SABERES FRANÇA–BRASIL',
     leadScopeBadge: '13 DIAPOSITIVE · PT · EN · FR',
@@ -386,6 +401,9 @@ export const PORTAL_COPY: Record<LangCode, PortalLocaleStrings> = {
     driveConnectedFallback: 'gekoppeld',
     footerStudio: 'Studio',
     footerStamp: 'ARCHIEF IN BEWEGING',
+    themeToggleLight: 'Licht thema',
+    themeToggleDark: 'Hoog contrast',
+    themeToggleAria: 'Wissel tussen licht thema en hoog contrast',
 
     leadKicker: 'OPENINGSVOORDRACHT · [ DOC. 01 ] · SABERES FRANÇA–BRASIL',
     leadScopeBadge: '13 DIA’S · PT · EN · FR',

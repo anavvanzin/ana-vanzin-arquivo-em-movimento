@@ -6,7 +6,6 @@ import {
   Columns2,
   Expand,
   ExternalLink,
-  FileText,
   Link2,
   List,
   Maximize2,
@@ -34,8 +33,6 @@ interface SlideReaderProps {
   onOpenPresenter: () => void;
   onOpenStudioForSlide: () => void;
   onOpenSources: () => void;
-  onOpenGoogleSlides?: () => void;
-  onOpenGoogleDocs?: () => void;
   onNotify: (msg: string) => void;
 }
 
@@ -54,8 +51,6 @@ export function SlideReader({
   onOpenPresenter,
   onOpenStudioForSlide,
   onOpenSources,
-  onOpenGoogleSlides,
-  onOpenGoogleDocs,
   onNotify,
 }: SlideReaderProps) {
   const [tocOpen, setTocOpen] = useState(false);
@@ -148,15 +143,15 @@ export function SlideReader({
               <div
                 role="group"
                 aria-label="Alternar dossiê"
-                className="flex items-center border border-[#1c1c1c] bg-white/50"
+                className="flex items-center border border-[#1c1c1c] dark:border-[#f2efeb]/65 bg-white/50 dark:bg-[#1a1a1a]"
               >
                 <button
                   type="button"
                   onClick={() => onChangeDeck('representacao')}
                   className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors whitespace-nowrap shrink-0 ${
                     deck === 'representacao'
-                      ? 'bg-[#1c1c1c] text-[#f2efeb]'
-                      : 'text-[#1c1c1c]/75 hover:text-[#1c1c1c]'
+                      ? 'bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d]'
+                      : 'text-[#1c1c1c]/75 dark:text-[#f2efeb]/80 hover:text-[#1c1c1c] dark:hover:text-[#f2efeb]'
                   }`}
                 >
                   {copy.deck01Short}
@@ -164,10 +159,10 @@ export function SlideReader({
                 <button
                   type="button"
                   onClick={() => onChangeDeck('trajeto')}
-                  className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border-l border-[#1c1c1c] transition-colors whitespace-nowrap shrink-0 ${
+                  className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border-l border-[#1c1c1c] dark:border-[#f2efeb]/65 transition-colors whitespace-nowrap shrink-0 ${
                     deck === 'trajeto'
-                      ? 'bg-[#1c1c1c] text-[#f2efeb]'
-                      : 'text-[#1c1c1c]/75 hover:text-[#1c1c1c]'
+                      ? 'bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d]'
+                      : 'text-[#1c1c1c]/75 dark:text-[#f2efeb]/80 hover:text-[#1c1c1c] dark:hover:text-[#f2efeb]'
                   }`}
                 >
                   {copy.deck02Short}
@@ -178,7 +173,7 @@ export function SlideReader({
                 type="button"
                 onClick={() => setTocOpen((v) => !v)}
                 aria-expanded={tocOpen}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] dark:border-[#f2efeb]/65 text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
               >
                 <List className="w-3.5 h-3.5" />
                 <span>{ui.toc}</span>
@@ -187,13 +182,13 @@ export function SlideReader({
 
             {/* 5-Language Synced Selector */}
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#1c1c1c]/60 hidden sm:inline">
+              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#1c1c1c]/60 dark:text-[#f2efeb]/70 hidden sm:inline">
                 {ui.lang}:
               </span>
               <div
                 role="navigation"
                 aria-label={ui.lang}
-                className="flex items-center border border-[#1c1c1c]/40 bg-white/50 p-0.5"
+                className="flex items-center border border-[#1c1c1c]/40 dark:border-[#f2efeb]/45 bg-white/50 dark:bg-[#1a1a1a] p-0.5"
               >
                 {LANGUAGES.map((l) => (
                   <button
@@ -204,8 +199,8 @@ export function SlideReader({
                     aria-current={l.code === lang ? 'true' : undefined}
                     className={`px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors whitespace-nowrap shrink-0 ${
                       l.code === lang
-                        ? 'bg-[#7e2a1f] text-[#f2efeb] font-bold'
-                        : 'text-[#1c1c1c]/70 hover:text-[#1c1c1c]'
+                        ? 'bg-[#7e2a1f] dark:bg-[#e5988b] text-[#f2efeb] dark:text-[#0d0d0d] font-bold'
+                        : 'text-[#1c1c1c]/70 dark:text-[#f2efeb]/75 hover:text-[#1c1c1c] dark:hover:text-[#f2efeb]'
                     }`}
                   >
                     {l.label}
@@ -222,10 +217,10 @@ export function SlideReader({
             aria-valuemin={1}
             aria-valuemax={slides.length}
             aria-valuenow={safeIndex + 1}
-            className="w-full h-[2px] bg-[#1c1c1c]/15 overflow-hidden"
+            className="w-full h-[2px] bg-[#1c1c1c]/15 dark:bg-[#f2efeb]/20 overflow-hidden"
           >
             <div
-              className="h-full bg-[#7e2a1f] transition-transform duration-150 origin-left"
+              className="h-full bg-[#7e2a1f] dark:bg-[#e5988b] transition-transform duration-150 origin-left"
               style={{ transform: `scaleX(${progressPct / 100})` }}
             />
           </div>
@@ -235,16 +230,16 @@ export function SlideReader({
         {tocOpen && (
           <nav
             aria-label={ui.toc}
-            className="p-6 bg-white/75 backdrop-blur-[4px] border-[1.5px] border-[#1c1c1c]"
+            className="p-6 bg-white/75 dark:bg-[#161616] backdrop-blur-[4px] border-[1.5px] border-[#1c1c1c] dark:border-[#f2efeb]/65"
           >
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#1c1c1c]/15">
-              <h2 className="font-serif text-2xl font-medium text-[#1c1c1c]">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#1c1c1c]/15 dark:border-[#f2efeb]/20">
+              <h2 className="font-serif text-2xl font-medium text-[#1c1c1c] dark:text-[#f2efeb]">
                 {ui.toc} — {deck === 'trajeto' ? ui.trajeto : ui.representacao}
               </h2>
               <button
                 type="button"
                 onClick={() => setTocOpen(false)}
-                className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#7e2a1f] hover:underline"
+                className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#7e2a1f] dark:text-[#e5988b] hover:underline"
               >
                 {ui.close}
               </button>
@@ -262,8 +257,8 @@ export function SlideReader({
                       }}
                       className={`w-full flex items-baseline gap-2.5 py-1.5 px-2.5 text-left text-xs border transition-colors ${
                         active
-                          ? 'bg-[#1c1c1c] text-[#f2efeb] border-[#1c1c1c] font-medium'
-                          : 'border-transparent text-[#1c1c1c]/80 hover:border-[#1c1c1c]/30 hover:bg-white'
+                          ? 'bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d] border-[#1c1c1c] dark:border-[#f2efeb] font-medium'
+                          : 'border-transparent text-[#1c1c1c]/80 dark:text-[#f2efeb]/85 hover:border-[#1c1c1c]/30 dark:hover:border-[#f2efeb]/40 hover:bg-white dark:hover:bg-[#222222]'
                       }`}
                     >
                       <span className="font-mono text-[10px] tabular-nums opacity-75 shrink-0">
@@ -282,22 +277,22 @@ export function SlideReader({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start min-h-[460px]">
           {/* Left Margin Rail (Folio Number + Linked Study Plates) */}
           <aside className="lg:col-span-3 space-y-6 lg:sticky lg:top-8">
-            <div className="pb-5 border-b border-[#1c1c1c]/20">
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#7e2a1f] mb-1.5">
+            <div className="pb-5 border-b border-[#1c1c1c]/20 dark:border-[#f2efeb]/25">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#7e2a1f] dark:text-[#e5988b] mb-1.5">
                 {deck === 'trajeto' ? ui.trajeto : ui.representacao}
               </p>
               <div className="flex items-baseline gap-2 font-mono tabular-nums">
-                <span className="text-3xl sm:text-4xl font-bold text-[#1c1c1c]">
+                <span className="text-3xl sm:text-4xl font-bold text-[#1c1c1c] dark:text-[#f2efeb]">
                   {String(safeIndex + 1).padStart(2, '0')}
                 </span>
-                <span className="text-xs text-[#1c1c1c]/60">
+                <span className="text-xs text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">
                   {ui.of} {String(slides.length).padStart(2, '0')}
                 </span>
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/65">
+              <div className="mt-3 flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/65 dark:text-[#f2efeb]/70">
                 {slideStatus === 'approved' ? (
-                  <span className="inline-flex items-center gap-1 text-[#14532d] font-bold">
+                  <span className="inline-flex items-center gap-1 text-[#14532d] dark:text-[#6ee7b7] font-bold">
                     <Check className="w-3 h-3" />
                     {copy.translationReviewed}
                   </span>
@@ -307,7 +302,7 @@ export function SlideReader({
                 {isModified && (
                   <>
                     <span aria-hidden="true">·</span>
-                    <span className="text-[#7e2a1f]">{copy.authorialEditActive}</span>
+                    <span className="text-[#7e2a1f] dark:text-[#e5988b]">{copy.authorialEditActive}</span>
                   </>
                 )}
               </div>
@@ -317,14 +312,14 @@ export function SlideReader({
             {linkedAtlas.length > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/65">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/65 dark:text-[#f2efeb]/70">
                     {copy.platesHeading(linkedAtlas.length)}
                   </p>
                   {linkedAtlas.length >= 2 && (
                     <button
                       type="button"
                       onClick={() => onOpenLightbox(linkedAtlas[0], linkedAtlas[1].id)}
-                      className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-[#7e2a1f] hover:underline"
+                      className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-[#7e2a1f] dark:text-[#e5988b] hover:underline"
                     >
                       <Columns2 className="w-3 h-3" />
                       <span>{copy.compareBtn}</span>
@@ -338,9 +333,9 @@ export function SlideReader({
                       key={plate.id}
                       type="button"
                       onClick={() => onOpenLightbox(plate)}
-                      className="group w-full text-left bg-white/70 border border-[#1c1c1c]/25 hover:border-[#1c1c1c] overflow-hidden transition-colors"
+                      className="group w-full text-left bg-white/70 dark:bg-[#1a1a1a] border border-[#1c1c1c]/25 dark:border-[#f2efeb]/30 hover:border-[#1c1c1c] dark:hover:border-[#f2efeb] overflow-hidden transition-colors"
                     >
-                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#e7e2da] border-b border-[#1c1c1c]/15">
+                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#e7e2da] dark:bg-[#121212] border-b border-[#1c1c1c]/15 dark:border-[#f2efeb]/15">
                         <ArchivalPlateImage
                           src={plate.imageSrc}
                           alt={plate.imageAlt}
@@ -348,16 +343,16 @@ export function SlideReader({
                           title={plate.title}
                           className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.04]"
                         />
-                        <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 bg-[#1c1c1c] text-[#f2efeb] font-mono text-[10px] uppercase tracking-wider">
+                        <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 bg-[#1c1c1c] text-[#f2efeb] font-mono text-[10px] uppercase tracking-wider border border-white/20">
                           <Expand className="w-2.5 h-2.5" />
                           <span>{copy.loupeBadge}</span>
                         </span>
                       </div>
                       <div className="p-3 space-y-0.5">
-                        <p className="font-mono text-[10px] text-[#7e2a1f] tabular-nums">
+                        <p className="font-mono text-[10px] text-[#7e2a1f] dark:text-[#e5988b] tabular-nums">
                           {plate.year} · {plate.accessionCode}
                         </p>
-                        <p className="font-serif text-sm font-medium leading-snug text-[#1c1c1c] line-clamp-2">
+                        <p className="font-serif text-sm font-medium leading-snug text-[#1c1c1c] dark:text-[#f2efeb] line-clamp-2">
                           {plate.title}
                         </p>
                       </div>
@@ -371,17 +366,17 @@ export function SlideReader({
           {/* Main Slide Reading Folio */}
           <article
             id={`slide-${String(safeIndex + 1).padStart(2, '0')}`}
-            className="lg:col-span-9 p-7 sm:p-10 lg:p-12 bg-white/75 backdrop-blur-[4px] border-[1.5px] border-[#1c1c1c] space-y-8"
+            className="lg:col-span-9 p-7 sm:p-10 lg:p-12 bg-white/75 dark:bg-[#161616] backdrop-blur-[4px] border-[1.5px] border-[#1c1c1c] dark:border-[#f2efeb]/65 space-y-8"
           >
-            <header className="border-b border-[#1c1c1c]/15 pb-6">
-              <h1 className="font-serif font-light text-3xl sm:text-4xl lg:text-[3rem] leading-[1.08] text-[#1c1c1c] whitespace-pre-line">
+            <header className="border-b border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 pb-6">
+              <h1 className="font-serif font-light text-3xl sm:text-4xl lg:text-[3rem] leading-[1.08] text-[#1c1c1c] dark:text-[#f2efeb] whitespace-pre-line">
                 {current.title}
               </h1>
             </header>
 
             {/* Authentic 16:9 Slide Presentation Visual */}
             {current.slideImage && (
-              <div className="relative group w-full bg-[#1c1c1c] border-[1.5px] border-[#1c1c1c] shadow-[4px_4px_0px_0px_#1c1c1c] overflow-hidden">
+              <div className="relative group w-full bg-[#1c1c1c] border-[1.5px] border-[#1c1c1c] dark:border-[#f2efeb]/65 shadow-[4px_4px_0px_0px_#1c1c1c] dark:shadow-[4px_4px_0px_0px_rgba(242,239,235,0.2)] overflow-hidden">
                 <div className="relative aspect-[16/9] w-full bg-[#151515] flex items-center justify-center">
                   <img
                     src={current.slideImage}
@@ -396,23 +391,12 @@ export function SlideReader({
                     <button
                       type="button"
                       onClick={onOpenPresenter}
-                      className="px-2.5 py-1 bg-[#f2efeb] text-[#1c1c1c] font-mono text-[10px] uppercase tracking-wider border border-[#1c1c1c] hover:bg-white inline-flex items-center gap-1.5 shadow-sm"
+                      className="px-2.5 py-1 bg-[#f2efeb] dark:bg-[#161616] text-[#1c1c1c] dark:text-[#f2efeb] font-mono text-[10px] uppercase tracking-wider border border-[#1c1c1c] dark:border-[#f2efeb]/50 hover:bg-white dark:hover:bg-[#e5988b] dark:hover:text-[#0d0d0d] dark:hover:border-[#e5988b] inline-flex items-center gap-1.5 shadow-sm transition-colors"
                       title={`${copy.presenterShortBtn} (P)`}
                     >
                       <Maximize2 className="w-3 h-3" />
                       <span>{copy.presenterShortBtn}</span>
                     </button>
-                    {onOpenGoogleSlides && (
-                      <button
-                        type="button"
-                        onClick={onOpenGoogleSlides}
-                        className="px-2.5 py-1 bg-[#7e2a1f] text-[#f2efeb] font-mono text-[10px] uppercase tracking-wider border border-[#7e2a1f] hover:bg-[#1c1c1c] inline-flex items-center gap-1.5 shadow-sm"
-                        title="Google Slides"
-                      >
-                        <Presentation className="w-3 h-3" />
-                        <span>Google Slides</span>
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -431,18 +415,18 @@ export function SlideReader({
                   key={bIdx}
                   className={
                     isTwoColumnComparison || isFourFunctionsGrid
-                      ? 'p-5 bg-[#f2efeb]/75 border border-[#1c1c1c]/20 space-y-2.5'
+                      ? 'p-5 bg-[#f2efeb]/75 dark:bg-[#1e1e1e] border border-[#1c1c1c]/20 dark:border-[#f2efeb]/25 space-y-2.5'
                       : block.label
-                      ? 'pt-4 border-t border-[#1c1c1c]/12 first:pt-0 first:border-t-0 space-y-1.5'
+                      ? 'pt-4 border-t border-[#1c1c1c]/12 dark:border-[#f2efeb]/15 first:pt-0 first:border-t-0 space-y-1.5'
                       : 'space-y-1.5'
                   }
                 >
                   {block.label && (
-                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#7e2a1f]">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#7e2a1f] dark:text-[#e5988b]">
                       {block.label}
                     </p>
                   )}
-                  <p className="text-base sm:text-[1.0625rem] leading-[1.7] text-[#1c1c1c]/90 whitespace-pre-line">
+                  <p className="text-base sm:text-[1.0625rem] leading-[1.7] text-[#1c1c1c]/90 dark:text-[#f2efeb]/90 whitespace-pre-line">
                     {block.text}
                   </p>
                 </div>
@@ -451,9 +435,9 @@ export function SlideReader({
 
             {/* Methodological Footnote & Primary Source */}
             {(current.footer || current.source) && (
-              <footer className="pt-6 border-t border-[#1c1c1c]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <footer className="pt-6 border-t border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 {current.footer ? (
-                  <p className="font-serif italic text-lg text-[#1c1c1c]/70 max-w-2xl">
+                  <p className="font-serif italic text-lg text-[#1c1c1c]/70 dark:text-[#f2efeb]/75 max-w-2xl">
                     {current.footer}
                   </p>
                 ) : (
@@ -465,7 +449,7 @@ export function SlideReader({
                     href={current.source}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-[#7e2a1f] hover:underline shrink-0"
+                    className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-[#7e2a1f] dark:text-[#e5988b] hover:underline shrink-0"
                   >
                     <span>{ui.source}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -477,19 +461,19 @@ export function SlideReader({
         </div>
 
         {/* Bottom Navigation & Tools Bar */}
-        <div className="pt-5 border-t border-[#1c1c1c]/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="pt-5 border-t border-[#1c1c1c]/20 dark:border-[#f2efeb]/25 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
             <button
               type="button"
               onClick={() => onChangeSlide(safeIndex - 1)}
               disabled={safeIndex === 0}
-              className="inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] disabled:opacity-30 disabled:pointer-events-none transition-colors whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] dark:border-[#f2efeb]/70 text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] disabled:opacity-30 disabled:pointer-events-none transition-colors whitespace-nowrap shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>{ui.previous}</span>
             </button>
 
-            <span className="font-mono text-xs tabular-nums text-[#1c1c1c]/70 px-2">
+            <span className="font-mono text-xs tabular-nums text-[#1c1c1c]/70 dark:text-[#f2efeb]/75 px-2">
               {String(safeIndex + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
             </span>
 
@@ -497,7 +481,7 @@ export function SlideReader({
               type="button"
               onClick={() => onChangeSlide(safeIndex + 1)}
               disabled={safeIndex === slides.length - 1}
-              className="inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] disabled:opacity-30 disabled:pointer-events-none transition-colors whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] dark:border-[#f2efeb] bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] dark:hover:bg-[#e5988b] dark:hover:border-[#e5988b] disabled:opacity-30 disabled:pointer-events-none transition-colors whitespace-nowrap shrink-0"
             >
               <span>{ui.next}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -508,7 +492,7 @@ export function SlideReader({
             <button
               type="button"
               onClick={onOpenStudioForSlide}
-              className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c]/40 text-[#1c1c1c] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c]/40 dark:border-[#f2efeb]/45 text-[#1c1c1c] dark:text-[#f2efeb] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:border-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
               title={copy.reviewSlideBtn}
             >
               <PenLine className="w-3.5 h-3.5" />
@@ -518,41 +502,17 @@ export function SlideReader({
             <button
               type="button"
               onClick={onOpenPresenter}
-              className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c]/40 text-[#1c1c1c] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c]/40 dark:border-[#f2efeb]/45 text-[#1c1c1c] dark:text-[#f2efeb] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:border-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
               title={`${copy.presenterShortBtn} (P)`}
             >
               <Presentation className="w-3.5 h-3.5" />
               <span>{copy.presenterShortBtn}</span>
             </button>
 
-            {onOpenGoogleSlides && (
-              <button
-                type="button"
-                onClick={onOpenGoogleSlides}
-                className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#7e2a1f]/60 text-[#7e2a1f] hover:border-[#7e2a1f] hover:bg-[#7e2a1f] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
-                title="Apresentar ou Exportar no Google Slides"
-              >
-                <Presentation className="w-3.5 h-3.5" />
-                <span>Google Slides</span>
-              </button>
-            )}
-
-            {onOpenGoogleDocs && (
-              <button
-                type="button"
-                onClick={onOpenGoogleDocs}
-                className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c]/40 text-[#1c1c1c] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
-                title="Ler ou Exportar como Google Doc"
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>Google Docs</span>
-              </button>
-            )}
-
             <button
               type="button"
               onClick={handleCopyLink}
-              className="p-2 border border-[#1c1c1c]/40 text-[#1c1c1c] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors"
+              className="p-2 border border-[#1c1c1c]/40 dark:border-[#f2efeb]/45 text-[#1c1c1c] dark:text-[#f2efeb] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:border-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors"
               title={ui.copy}
               aria-label={ui.copy}
             >
@@ -562,7 +522,7 @@ export function SlideReader({
             <button
               type="button"
               onClick={handleToggleFullscreen}
-              className="p-2 border border-[#1c1c1c]/40 text-[#1c1c1c] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors"
+              className="p-2 border border-[#1c1c1c]/40 dark:border-[#f2efeb]/45 text-[#1c1c1c] dark:text-[#f2efeb] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:border-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors"
               title={ui.fullscreen}
               aria-label={ui.fullscreen}
             >
@@ -572,7 +532,7 @@ export function SlideReader({
             <button
               type="button"
               onClick={() => window.print()}
-              className="p-2 border border-[#1c1c1c]/40 text-[#1c1c1c] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors"
+              className="p-2 border border-[#1c1c1c]/40 dark:border-[#f2efeb]/45 text-[#1c1c1c] dark:text-[#f2efeb] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:border-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors"
               title={ui.print}
               aria-label={ui.print}
             >
@@ -581,14 +541,14 @@ export function SlideReader({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-[#1c1c1c]/60">
+        <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">
           <span>
             {ui.keys} · {copy.shortcutsSuffix(linkedAtlas.length > 0)}
           </span>
           <button
             type="button"
             onClick={onOpenSources}
-            className="hover:text-[#7e2a1f] hover:underline"
+            className="hover:text-[#7e2a1f] dark:hover:text-[#e5988b] hover:underline"
           >
             {ui.work} · {ui.sources}
           </button>

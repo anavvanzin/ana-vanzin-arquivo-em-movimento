@@ -132,31 +132,31 @@ export function DocumentaryTimeline({
   return (
     <section aria-labelledby="documentary-timeline-heading" className="space-y-6">
       {/* Header + Citation Check Legend + Stepper */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-[#1c1c1c]/15 pb-6">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 pb-6">
         <div className="space-y-2.5 max-w-3xl">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#7e2a1f]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#7e2a1f] dark:text-[#e5988b]">
             {copy.kicker}
           </p>
           <h2
             id="documentary-timeline-heading"
-            className="font-serif text-3xl sm:text-4xl lg:text-[2.75rem] font-light leading-[1.06] text-[#1c1c1c]"
+            className="font-serif text-3xl sm:text-4xl lg:text-[2.75rem] font-light leading-[1.06] text-[#1c1c1c] dark:text-[#f2efeb]"
           >
             {copy.heading}
           </h2>
-          <p className="text-sm sm:text-base leading-relaxed text-[#1c1c1c]/75 max-w-2xl">
+          <p className="text-sm sm:text-base leading-relaxed text-[#1c1c1c]/75 dark:text-[#f2efeb]/80 max-w-2xl">
             {copy.methodNote}
           </p>
 
           {/* Unboxed Verification Legend */}
           <div className="pt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px]">
-            <span className="inline-flex items-center gap-1.5 text-[#14532d]">
+            <span className="inline-flex items-center gap-1.5 text-[#14532d] dark:text-[#6ee7b7]">
               <CheckCircle2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <span>{copy.verificationLegendVerified}</span>
             </span>
-            <span aria-hidden="true" className="text-[#1c1c1c]/30">
+            <span aria-hidden="true" className="text-[#1c1c1c]/30 dark:text-[#f2efeb]/35">
               ·
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[#7e2a1f]">
+            <span className="inline-flex items-center gap-1.5 text-[#7e2a1f] dark:text-[#e5988b]">
               <AlertTriangle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <span>{copy.verificationLegendPending}</span>
             </span>
@@ -165,7 +165,7 @@ export function DocumentaryTimeline({
 
         {/* Step Controls & Numeric Progress */}
         <div className="flex items-center gap-2 self-start lg:self-end shrink-0">
-          <span className="font-mono text-xs tabular-nums text-[#1c1c1c]/70 mr-1.5">
+          <span className="font-mono text-xs tabular-nums text-[#1c1c1c]/70 dark:text-[#f2efeb]/75 mr-1.5">
             {String(activeIndex + 1).padStart(2, '0')} /{' '}
             {String(visibleMilestones.length).padStart(2, '0')}
           </span>
@@ -174,7 +174,7 @@ export function DocumentaryTimeline({
             onClick={() => handleStep(-1)}
             disabled={activeIndex <= 0}
             aria-label={copy.previousMilestone}
-            className="p-2.5 min-w-[40px] min-h-[40px] inline-flex items-center justify-center border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            className="p-2.5 min-w-[40px] min-h-[40px] inline-flex items-center justify-center border border-[#1c1c1c] dark:border-[#f2efeb]/70 text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] disabled:opacity-30 disabled:pointer-events-none transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -183,7 +183,7 @@ export function DocumentaryTimeline({
             onClick={() => handleStep(1)}
             disabled={activeIndex >= visibleMilestones.length - 1}
             aria-label={copy.nextMilestone}
-            className="p-2.5 min-w-[40px] min-h-[40px] inline-flex items-center justify-center border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            className="p-2.5 min-w-[40px] min-h-[40px] inline-flex items-center justify-center border border-[#1c1c1c] dark:border-[#f2efeb]/70 text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] disabled:opacity-30 disabled:pointer-events-none transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -206,8 +206,8 @@ export function DocumentaryTimeline({
               aria-pressed={isActive}
               className={`px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border transition-colors whitespace-nowrap shrink-0 ${
                 isActive
-                  ? 'bg-[#1c1c1c] border-[#1c1c1c] text-[#f2efeb]'
-                  : 'bg-white/50 border-[#1c1c1c]/30 text-[#1c1c1c]/80 hover:border-[#1c1c1c] hover:text-[#1c1c1c]'
+                  ? 'bg-[#1c1c1c] dark:bg-[#f2efeb] border-[#1c1c1c] dark:border-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d]'
+                  : 'bg-white/50 dark:bg-[#1a1a1a] border-[#1c1c1c]/30 dark:border-[#f2efeb]/35 text-[#1c1c1c]/80 dark:text-[#f2efeb]/85 hover:border-[#1c1c1c] dark:hover:border-[#f2efeb] hover:text-[#1c1c1c] dark:hover:text-[#f2efeb]'
               }`}
             >
               {f.label}
@@ -217,7 +217,7 @@ export function DocumentaryTimeline({
       </div>
 
       {/* Interactive Horizontal Chronological Track */}
-      <div className="bg-white/45 backdrop-blur-[4px] border-[1.5px] border-[#1c1c1c] px-4 py-5 sm:px-6">
+      <div className="bg-white/45 dark:bg-[#141414] backdrop-blur-[4px] border-[1.5px] border-[#1c1c1c] dark:border-[#f2efeb]/65 px-4 py-5 sm:px-6">
         <div
           ref={trackRef}
           role="tablist"
@@ -242,8 +242,8 @@ export function DocumentaryTimeline({
                     aria-hidden="true"
                     className="flex flex-col justify-center items-center px-1.5 shrink-0 select-none"
                   >
-                    <div className="h-full border-l border-dashed border-[#1c1c1c]/30 relative flex items-center">
-                      <span className="ml-1.5 font-mono text-[10px] tracking-wider text-[#1c1c1c]/55 [writing-mode:vertical-rl] rotate-180 whitespace-nowrap">
+                    <div className="h-full border-l border-dashed border-[#1c1c1c]/30 dark:border-[#f2efeb]/35 relative flex items-center">
+                      <span className="ml-1.5 font-mono text-[10px] tracking-wider text-[#1c1c1c]/55 dark:text-[#f2efeb]/65 [writing-mode:vertical-rl] rotate-180 whitespace-nowrap">
                         {showEarlyModernHiatus
                           ? copy.hiatusLabels.earlyModernToEmpire
                           : copy.hiatusLabels.empireToRepublic}
@@ -264,29 +264,29 @@ export function DocumentaryTimeline({
                   tabIndex={isSelected ? 0 : -1}
                   onClick={() => selectMilestone(milestone.id)}
                   onKeyDown={(e) => handleTrackKeyDown(e, idx)}
-                  className={`group relative flex flex-col justify-between text-left min-w-[190px] sm:min-w-[204px] max-w-[222px] p-4 border transition-colors shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e2a1f] ${
+                  className={`group relative flex flex-col justify-between text-left min-w-[190px] sm:min-w-[204px] max-w-[222px] p-4 border transition-colors shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e2a1f] dark:focus-visible:outline-[#e5988b] ${
                     isSelected
-                      ? 'bg-white border-[1.5px] border-[#1c1c1c] shadow-[4px_4px_0px_#7e2a1f]'
-                      : 'bg-[#f2efeb]/80 border-[#1c1c1c]/20 hover:bg-white hover:border-[#1c1c1c]'
+                      ? 'bg-white dark:bg-[#222222] border-[1.5px] border-[#1c1c1c] dark:border-[#f2efeb] shadow-[4px_4px_0px_#7e2a1f] dark:shadow-[4px_4px_0px_#e5988b]'
+                      : 'bg-[#f2efeb]/80 dark:bg-[#1a1a1a] border-[#1c1c1c]/20 dark:border-[#f2efeb]/25 hover:bg-white dark:hover:bg-[#222222] hover:border-[#1c1c1c] dark:hover:border-[#f2efeb]/70'
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2 w-full pb-2.5 border-b border-[#1c1c1c]/12">
+                  <div className="flex items-center justify-between gap-2 w-full pb-2.5 border-b border-[#1c1c1c]/12 dark:border-[#f2efeb]/15">
                     <span
                       className={`font-mono text-sm sm:text-base font-bold tabular-nums whitespace-nowrap ${
-                        isSelected ? 'text-[#7e2a1f]' : 'text-[#1c1c1c]'
+                        isSelected ? 'text-[#7e2a1f] dark:text-[#e5988b]' : 'text-[#1c1c1c] dark:text-[#f2efeb]'
                       }`}
                     >
                       {milestone.year}
                     </span>
-                    <span className="inline-flex items-center gap-1 font-mono text-[10px] tabular-nums text-[#1c1c1c]/60">
+                    <span className="inline-flex items-center gap-1 font-mono text-[10px] tabular-nums text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">
                       {nodeVerified ? (
                         <CheckCircle2
-                          className="w-3 h-3 text-[#14532d]"
+                          className="w-3 h-3 text-[#14532d] dark:text-[#6ee7b7]"
                           aria-hidden="true"
                         />
                       ) : (
                         <AlertTriangle
-                          className="w-3 h-3 text-[#7e2a1f]"
+                          className="w-3 h-3 text-[#7e2a1f] dark:text-[#e5988b]"
                           aria-hidden="true"
                         />
                       )}
@@ -297,12 +297,12 @@ export function DocumentaryTimeline({
                   <div className="pt-2.5 space-y-1.5">
                     <p
                       className={`font-serif text-lg leading-snug line-clamp-2 ${
-                        isSelected ? 'text-[#1c1c1c] font-bold' : 'text-[#1c1c1c]/85 font-medium'
+                        isSelected ? 'text-[#1c1c1c] dark:text-[#f2efeb] font-bold' : 'text-[#1c1c1c]/85 dark:text-[#f2efeb]/85 font-medium'
                       }`}
                     >
                       {mCopy.shortLabel}
                     </p>
-                    <p className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/55 truncate">
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/55 dark:text-[#f2efeb]/65 truncate">
                       {copy.sourceKindLabels[milestone.sourceKind]}
                     </p>
                   </div>
@@ -319,16 +319,16 @@ export function DocumentaryTimeline({
         role="tabpanel"
         id={`timeline-panel-${activeMilestone.id}`}
         aria-labelledby={`timeline-tab-${activeMilestone.id}`}
-        className="animate-timeline-panel bg-white/75 backdrop-blur-[4px] border border-[#1c1c1c] p-6 sm:p-8 lg:p-10"
+        className="animate-timeline-panel bg-white/75 dark:bg-[#161616] backdrop-blur-[4px] border border-[#1c1c1c] dark:border-[#f2efeb]/65 p-6 sm:p-8 lg:p-10"
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left 8 (or 12) Columns: Scholarly Citation Sheet */}
           <div className={`${linkedAtlasEntry ? 'lg:col-span-8' : 'lg:col-span-12'} space-y-6`}>
             {/* Top Register Line + Copy Citation Button */}
-            <div className="space-y-3 border-b border-[#1c1c1c]/15 pb-5">
+            <div className="space-y-3 border-b border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 pb-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[11px] text-[#1c1c1c]/65 tabular-nums">
-                  <span className="text-[#7e2a1f] font-bold">{activeMilestone.year}</span>
+                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[11px] text-[#1c1c1c]/65 dark:text-[#f2efeb]/70 tabular-nums">
+                  <span className="text-[#7e2a1f] dark:text-[#e5988b] font-bold">{activeMilestone.year}</span>
                   <span aria-hidden="true">·</span>
                   <span>{activeMilestone.accessionCode}</span>
                   <span aria-hidden="true">·</span>
@@ -336,7 +336,7 @@ export function DocumentaryTimeline({
                   <span aria-hidden="true">·</span>
                   <span
                     className={`inline-flex items-center gap-1 ${
-                      isVerifiedPrimary ? 'text-[#14532d]' : 'text-[#7e2a1f]'
+                      isVerifiedPrimary ? 'text-[#14532d] dark:text-[#6ee7b7]' : 'text-[#7e2a1f] dark:text-[#e5988b]'
                     }`}
                   >
                     {isVerifiedPrimary ? (
@@ -351,11 +351,11 @@ export function DocumentaryTimeline({
                 <button
                   type="button"
                   onClick={handleCopyCitation}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] dark:border-[#f2efeb]/70 text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
                 >
                   {isCopied ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-[#14532d]" />
+                      <Check className="w-3.5 h-3.5 text-[#14532d] dark:text-[#6ee7b7]" />
                       <span>{copy.copiedCitationLabel}</span>
                     </>
                   ) : (
@@ -367,7 +367,7 @@ export function DocumentaryTimeline({
                 </button>
               </div>
 
-              <h3 className="font-serif text-2xl sm:text-3xl font-medium leading-snug text-[#1c1c1c]">
+              <h3 className="font-serif text-2xl sm:text-3xl font-medium leading-snug text-[#1c1c1c] dark:text-[#f2efeb]">
                 {milestoneCopy.title}
               </h3>
             </div>
@@ -376,34 +376,34 @@ export function DocumentaryTimeline({
             <div className="space-y-2">
               <div
                 aria-hidden="true"
-                className="hidden sm:flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/60 px-1"
+                className="hidden sm:flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/60 dark:text-[#f2efeb]/70 px-1"
               >
                 <span>{copy.axisBridgeHeaderLeft}</span>
                 <span>⇄</span>
                 <span>{copy.axisBridgeHeaderRight}</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 border border-[#1c1c1c]/25 divide-y sm:divide-y-0 sm:divide-x divide-[#1c1c1c]/20 bg-[#f2efeb]/65">
+              <div className="grid grid-cols-1 sm:grid-cols-2 border border-[#1c1c1c]/25 dark:border-[#f2efeb]/30 divide-y sm:divide-y-0 sm:divide-x divide-[#1c1c1c]/20 dark:divide-[#f2efeb]/20 bg-[#f2efeb]/65 dark:bg-[#1e1e1e]">
                 <div className="p-4 sm:p-5 space-y-1.5">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/60">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">
                     {milestoneCopy.matrixPole.tag}
                   </p>
-                  <p className="font-serif text-lg font-medium leading-snug text-[#1c1c1c]">
+                  <p className="font-serif text-lg font-medium leading-snug text-[#1c1c1c] dark:text-[#f2efeb]">
                     {milestoneCopy.matrixPole.title}
                   </p>
-                  <p className="text-xs leading-relaxed text-[#1c1c1c]/75">
+                  <p className="text-xs leading-relaxed text-[#1c1c1c]/75 dark:text-[#f2efeb]/80">
                     {milestoneCopy.matrixPole.summary}
                   </p>
                 </div>
 
                 <div className="p-4 sm:p-5 space-y-1.5">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#7e2a1f]">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#7e2a1f] dark:text-[#e5988b]">
                     {milestoneCopy.casePole.tag}
                   </p>
-                  <p className="font-serif text-lg font-medium leading-snug text-[#1c1c1c]">
+                  <p className="font-serif text-lg font-medium leading-snug text-[#1c1c1c] dark:text-[#f2efeb]">
                     {milestoneCopy.casePole.title}
                   </p>
-                  <p className="text-xs leading-relaxed text-[#1c1c1c]/75">
+                  <p className="text-xs leading-relaxed text-[#1c1c1c]/75 dark:text-[#f2efeb]/80">
                     {milestoneCopy.casePole.summary}
                   </p>
                 </div>
@@ -411,20 +411,20 @@ export function DocumentaryTimeline({
             </div>
 
             {/* Key Documentary Formulation */}
-            <blockquote className="py-4 border-y border-[#1c1c1c]/15 font-serif italic text-lg sm:text-xl leading-relaxed text-[#1c1c1c] max-w-2xl">
+            <blockquote className="py-4 border-y border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 font-serif italic text-lg sm:text-xl leading-relaxed text-[#1c1c1c] dark:text-[#f2efeb] max-w-2xl">
               “{milestoneCopy.keyFormulation}”
             </blockquote>
 
             {/* Source Citation & Methodological Qualification */}
             <div className="space-y-2.5 text-xs leading-relaxed max-w-2xl">
-              <p className="text-[#1c1c1c]/85">
-                <strong className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]">
+              <p className="text-[#1c1c1c]/85 dark:text-[#f2efeb]/85">
+                <strong className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c] dark:text-[#f2efeb]">
                   {copy.bibliographicRefLabel}
                 </strong>{' '}
                 <span>{milestoneCopy.bibliographicRef}</span>
               </p>
-              <p className="text-[#1c1c1c]/75">
-                <strong className="font-mono text-[10px] uppercase tracking-wider text-[#7e2a1f]">
+              <p className="text-[#1c1c1c]/75 dark:text-[#f2efeb]/80">
+                <strong className="font-mono text-[10px] uppercase tracking-wider text-[#7e2a1f] dark:text-[#e5988b]">
                   {copy.qualificationLabel}
                 </strong>{' '}
                 <span>{milestoneCopy.documentaryCaution}</span>
@@ -432,7 +432,7 @@ export function DocumentaryTimeline({
 
               {/* Optional Cross-Link to the 11/11/2026 Montesquieu / Dauchy Intervention */}
               {activeMilestone.companionCrossRef && (
-                <p className="pt-1 text-[#1c1c1c]/80">
+                <p className="pt-1 text-[#1c1c1c]/80 dark:text-[#f2efeb]/85">
                   <span>
                     {activeMilestone.companionCrossRef.noteByLang[lang] ||
                       activeMilestone.companionCrossRef.noteByLang.pt}{' '}
@@ -441,7 +441,7 @@ export function DocumentaryTimeline({
                     href={activeMilestone.companionCrossRef.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-mono text-[11px] text-[#7e2a1f] hover:underline whitespace-nowrap"
+                    className="inline-flex items-center gap-1 font-mono text-[11px] text-[#7e2a1f] dark:text-[#e5988b] hover:underline whitespace-nowrap"
                   >
                     <span>
                       {activeMilestone.companionCrossRef.labelByLang[lang] ||
@@ -454,8 +454,8 @@ export function DocumentaryTimeline({
             </div>
 
             {/* Direct Slide Citations & Action Bar */}
-            <div className="pt-4 border-t border-[#1c1c1c]/15 space-y-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#1c1c1c]/60">
+            <div className="pt-4 border-t border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 space-y-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">
                 {copy.citedSlidesLabel}
               </p>
 
@@ -467,13 +467,13 @@ export function DocumentaryTimeline({
                       key={`${citation.deck}-${citation.slideIndex}`}
                       type="button"
                       onClick={() => onOpenDeck(citation.deck, lang, citation.slideIndex)}
-                      className="inline-flex items-center gap-2 px-3 py-2 text-xs text-left border border-[#1c1c1c]/25 bg-[#f2efeb]/70 hover:border-[#1c1c1c] hover:bg-white transition-colors"
+                      className="inline-flex items-center gap-2 px-3 py-2 text-xs text-left border border-[#1c1c1c]/25 dark:border-[#f2efeb]/30 bg-[#f2efeb]/70 dark:bg-[#1e1e1e] hover:border-[#1c1c1c] dark:hover:border-[#f2efeb] hover:bg-white dark:hover:bg-[#262626] transition-colors"
                     >
-                      <FileText className="w-3.5 h-3.5 shrink-0 text-[#7e2a1f]" />
-                      <span className="font-mono text-[10px] tabular-nums text-[#1c1c1c]/65 whitespace-nowrap">
+                      <FileText className="w-3.5 h-3.5 shrink-0 text-[#7e2a1f] dark:text-[#e5988b]" />
+                      <span className="font-mono text-[10px] tabular-nums text-[#1c1c1c]/65 dark:text-[#f2efeb]/70 whitespace-nowrap">
                         {copy.deckNames[citation.deck]} · Slide {citation.slideNum}
                       </span>
-                      <span className="font-medium text-[#1c1c1c] truncate max-w-[240px]">
+                      <span className="font-medium text-[#1c1c1c] dark:text-[#f2efeb] truncate max-w-[240px]">
                         {slideTitle}
                       </span>
                       <ArrowRight className="w-3 h-3 shrink-0 opacity-70" />
@@ -487,7 +487,7 @@ export function DocumentaryTimeline({
                   <button
                     type="button"
                     onClick={() => onOpenAtlasEntry(linkedAtlasEntry)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] dark:border-[#f2efeb] bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] dark:hover:bg-[#e5988b] dark:hover:border-[#e5988b] transition-colors whitespace-nowrap shrink-0"
                   >
                     <Expand className="w-3.5 h-3.5" />
                     <span>{copy.openLightbox}</span>
@@ -499,7 +499,7 @@ export function DocumentaryTimeline({
                     href={activeMilestone.primarySourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] dark:border-[#f2efeb]/70 text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
                   >
                     <span>{copy.openPrimarySource}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -509,7 +509,7 @@ export function DocumentaryTimeline({
                 <button
                   type="button"
                   onClick={() => onNavigateView('apparatus')}
-                  className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-[#7e2a1f] hover:underline whitespace-nowrap shrink-0"
+                  className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-[#7e2a1f] dark:text-[#e5988b] hover:underline whitespace-nowrap shrink-0"
                 >
                   <span>{copy.openApparatus}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -525,7 +525,7 @@ export function DocumentaryTimeline({
                 type="button"
                 onClick={() => onOpenAtlasEntry(linkedAtlasEntry)}
                 aria-label={`${copy.openLightbox}: ${linkedAtlasEntry.title}`}
-                className="group relative block w-full aspect-[4/3] overflow-hidden border border-[#1c1c1c]/30 hover:border-[#1c1c1c] bg-[#e7e2da] text-left transition-colors"
+                className="group relative block w-full aspect-[4/3] overflow-hidden border border-[#1c1c1c]/30 dark:border-[#f2efeb]/35 hover:border-[#1c1c1c] dark:hover:border-[#f2efeb] bg-[#e7e2da] dark:bg-[#1a1a1a] text-left transition-colors"
               >
                 <ArchivalPlateImage
                   src={linkedAtlasEntry.imageSrc}
@@ -534,12 +534,12 @@ export function DocumentaryTimeline({
                   title={linkedAtlasEntry.title}
                   className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
                 />
-                <span className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 px-2.5 py-1 bg-[#1c1c1c] text-[#f2efeb] font-mono text-[10px] uppercase tracking-[0.1em]">
+                <span className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 px-2.5 py-1 bg-[#1c1c1c] text-[#f2efeb] font-mono text-[10px] uppercase tracking-[0.1em] border border-white/20">
                   <Expand className="w-3 h-3" />
                   <span>{copy.openLightbox}</span>
                 </span>
               </button>
-              <p className="font-serif italic text-sm text-[#1c1c1c]/75">
+              <p className="font-serif italic text-sm text-[#1c1c1c]/75 dark:text-[#f2efeb]/80">
                 {linkedAtlasEntry.accessionCode} — {linkedAtlasEntry.title}
               </p>
             </div>

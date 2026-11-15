@@ -21,8 +21,15 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;0,600;0,700;1,400;1,600&family=Pinyon+Script&family=Plus+Jakarta+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      try {
+        if (localStorage.getItem('iconocracia-theme') === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    </script>
   </head>
-  <body class="bg-[#f2efeb] text-[#1c1c1c] antialiased selection:bg-[#7e2a1f] selection:text-[#f2efeb]">
+  <body class="bg-[#f2efeb] dark:bg-[#0d0d0d] text-[#1c1c1c] dark:text-[#f2efeb] antialiased selection:bg-[#7e2a1f] selection:text-[#f2efeb] dark:selection:bg-[#e5988b] dark:selection:text-[#0d0d0d]">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

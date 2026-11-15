@@ -310,59 +310,59 @@ export function LightboxModal({
         </div>
 
         {/* Accession & Epistemological Metadata Panel (Archival Paper Folio Contrast) */}
-        <aside className="lg:col-span-4 p-6 overflow-y-auto bg-[#f2efeb] text-[#1c1c1c] space-y-6">
+        <aside className="lg:col-span-4 p-6 overflow-y-auto bg-[#f2efeb] dark:bg-[#161616] text-[#1c1c1c] dark:text-[#f2efeb] space-y-6">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#7e2a1f]">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#7e2a1f] dark:text-[#e5988b]">
               Ficha de Estudo Documental
             </p>
-            <p className="mt-1.5 font-mono text-xs text-[#7e2a1f]">
+            <p className="mt-1.5 font-mono text-xs text-[#7e2a1f] dark:text-[#e5988b]">
               {entry.statusDetail}
             </p>
           </div>
 
-          <dl className="divide-y divide-[#1c1c1c]/15 border-y border-[#1c1c1c]/25 text-sm">
+          <dl className="divide-y divide-[#1c1c1c]/15 dark:divide-[#f2efeb]/15 border-y border-[#1c1c1c]/25 dark:border-[#f2efeb]/25 text-sm">
             <div className="py-3 grid grid-cols-3 gap-2">
-              <dt className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60">Datação</dt>
-              <dd className="col-span-2 font-mono text-xs tabular-nums font-bold text-[#1c1c1c]">{entry.year}</dd>
+              <dt className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">Datação</dt>
+              <dd className="col-span-2 font-mono text-xs tabular-nums font-bold text-[#1c1c1c] dark:text-[#f2efeb]">{entry.year}</dd>
             </div>
             <div className="py-3 grid grid-cols-3 gap-2">
-              <dt className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60">Autoria</dt>
-              <dd className="col-span-2 text-xs leading-relaxed text-[#1c1c1c]/85">{entry.creator}</dd>
+              <dt className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">Autoria</dt>
+              <dd className="col-span-2 text-xs leading-relaxed text-[#1c1c1c]/85 dark:text-[#f2efeb]/85">{entry.creator}</dd>
             </div>
             <div className="py-3 grid grid-cols-3 gap-2">
-              <dt className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60">Suporte</dt>
-              <dd className="col-span-2 text-xs leading-relaxed text-[#1c1c1c]/85">{entry.medium}</dd>
+              <dt className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">Suporte</dt>
+              <dd className="col-span-2 text-xs leading-relaxed text-[#1c1c1c]/85 dark:text-[#f2efeb]/85">{entry.medium}</dd>
             </div>
             <div className="py-3 grid grid-cols-3 gap-2">
-              <dt className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60">Contexto</dt>
-              <dd className="col-span-2 text-xs leading-relaxed text-[#1c1c1c]/85">
+              <dt className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">Contexto</dt>
+              <dd className="col-span-2 text-xs leading-relaxed text-[#1c1c1c]/85 dark:text-[#f2efeb]/85">
                 {entry.repositoryOrContext}
               </dd>
             </div>
             <div className="py-3 grid grid-cols-3 gap-2">
-              <dt className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60">Função</dt>
-              <dd className="col-span-2 text-xs leading-relaxed text-[#1c1c1c] font-semibold">
+              <dt className="font-mono text-[10px] uppercase tracking-wider text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">Função</dt>
+              <dd className="col-span-2 text-xs leading-relaxed text-[#1c1c1c] dark:text-[#f2efeb] font-semibold">
                 {entry.analyticalFunction}
               </dd>
             </div>
           </dl>
 
           <div className="space-y-2">
-            <h3 className="font-serif text-xl font-medium text-[#1c1c1c]">Problema jurídico-visual</h3>
-            <p className="text-sm leading-relaxed text-[#1c1c1c]/85">{entry.juridicalQuestion}</p>
+            <h3 className="font-serif text-xl font-medium text-[#1c1c1c] dark:text-[#f2efeb]">Problema jurídico-visual</h3>
+            <p className="text-sm leading-relaxed text-[#1c1c1c]/85 dark:text-[#f2efeb]/85">{entry.juridicalQuestion}</p>
           </div>
 
-          <div className="p-4 bg-white/75 border border-[#1c1c1c]/30 space-y-1.5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#7e2a1f]">
+          <div className="p-4 bg-white/75 dark:bg-[#1e1e1e] border border-[#1c1c1c]/30 dark:border-[#f2efeb]/35 space-y-1.5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#7e2a1f] dark:text-[#e5988b]">
               Protocolo de Verificação Autoral
             </p>
-            <p className="text-xs leading-relaxed text-[#1c1c1c]/80">{entry.verificationNotes}</p>
+            <p className="text-xs leading-relaxed text-[#1c1c1c]/80 dark:text-[#f2efeb]/85">{entry.verificationNotes}</p>
             {entry.primarySourceUrl && (
               <a
                 href={entry.primarySourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 pt-1 font-mono text-[11px] text-[#7e2a1f] hover:underline"
+                className="inline-flex items-center gap-1.5 pt-1 font-mono text-[11px] text-[#7e2a1f] dark:text-[#e5988b] hover:underline"
               >
                 <span>{entry.primarySourceLabel || 'Consultar fonte primária'}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -371,7 +371,7 @@ export function LightboxModal({
           </div>
 
           <div className="space-y-2.5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/60">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">
               Slides vinculados nas apresentações
             </p>
             <div className="space-y-1.5">
@@ -383,7 +383,7 @@ export function LightboxModal({
                     onClose();
                     onJumpToSlide(ref.deck, ref.slideIndex);
                   }}
-                  className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-white/75 hover:bg-[#1c1c1c] hover:text-[#f2efeb] border border-[#1c1c1c]/30 text-left text-xs transition-colors"
+                  className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-white/75 dark:bg-[#1e1e1e] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] border border-[#1c1c1c]/30 dark:border-[#f2efeb]/35 text-left text-xs transition-colors"
                 >
                   <span className="truncate">
                     <span className="font-mono text-[10px] uppercase opacity-70 mr-1.5">

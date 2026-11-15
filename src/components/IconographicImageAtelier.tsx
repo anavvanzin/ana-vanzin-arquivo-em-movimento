@@ -1,7 +1,6 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import {
-  CloudUpload,
-  Database,
+  BookmarkPlus,
   Download,
   Expand,
   ExternalLink,
@@ -14,7 +13,6 @@ import {
 } from 'lucide-react';
 import { ATLAS_ENTRIES } from '../data/atlasCatalog';
 import { SavedAtelierRecord } from '../hooks/useArchiveStore';
-import { findDriveFolderByName, uploadBinaryFileToDrive } from '../services/googleDrive';
 import { AtlasAxis, AtlasEntry } from '../types';
 
 type AtelierMode = 'create' | 'edit';
@@ -33,19 +31,15 @@ interface GeneratedPlateResult {
 }
 
 interface IconographicImageAtelierProps {
-  canSaveToFirestore: boolean;
-  canSaveToDrive: boolean;
   savedRecords: SavedAtelierRecord[];
-  onSaveRecordToFirestore: (input: {
+  onSaveRecordLocal: (input: {
     kind: 'image_plate' | 'spatial_view';
     title: string;
     promptOrSummary: string;
     axis: AtlasAxis;
     specSummary: string;
   }) => Promise<string>;
-  onDeleteFirestoreRecord: (id: string) => Promise<void>;
-  onSignInCloud: () => void;
-  onOpenDriveView: () => void;
+  onDeleteLocalRecord: (id: string) => Promise<void>;
   onInspectInLightbox: (entry: AtlasEntry) => void;
   onNotify: (msg: string) => void;
 }
@@ -123,26 +117,10 @@ async function urlToDataUrl(url: string): Promise<{ dataUrl: string; mimeType: s
   return { dataUrl, mimeType };
 }
 
-function dataUrlToFile(dataUrl: string, filename: string): File {
-  const [meta, content] = dataUrl.split(',');
-  const mimeMatch = meta.match(/data:([^;]+);base64/);
-  const mime = mimeMatch ? mimeMatch[1] : 'image/png';
-  const binary = atob(content);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return new File([bytes], filename, { type: mime });
-}
-
 export function IconographicImageAtelier({
-  canSaveToFirestore,
-  canSaveToDrive,
   savedRecords,
-  onSaveRecordToFirestore,
-  onDeleteFirestoreRecord,
-  onSignInCloud,
-  onOpenDriveView,
+  onSaveRecordLocal,
+  onDeleteLocalRecord,
   onInspectInLightbox,
   onNotify,
 }: IconographicImageAtelierProps) {
@@ -164,8 +142,7 @@ export function IconographicImageAtelier({
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [result, setResult] = useState<GeneratedPlateResult | null>(null);
-  const [isSavingFirestore, setIsSavingFirestore] = useState<boolean>(false);
-  const [isSavingDrive, setIsSavingDrive] = useState<boolean>(false);
+  const [isSavingLocal, setIsSavingLocal] = useState<boolean>(false);
 
   const plateRecords = savedRecords.filter((r) => r.kind === 'image_plate');
 
@@ -292,48 +269,25 @@ export function IconographicImageAtelier({
     a.remove();
   };
 
-  const handleSaveRecordFirestore = async () => {
+  const handleSaveRecordLocal = async () => {
     if (!result) return;
-    setIsSavingFirestore(true);
+    setIsSavingLocal(true);
     try {
       const specSummary = `${result.mode === 'edit' ? 'Edição' : 'Criação'} · ${
         result.aspectRatio
       } · ${result.imageSize}${useWebGrounding ? ' · Web/Img Search' : ''}`;
-      await onSaveRecordToFirestore({
+      await onSaveRecordLocal({
         kind: 'image_plate',
         title: title.trim() || 'Prancha de estudo iconográfico',
         promptOrSummary: result.promptUsed,
         axis,
         specSummary,
       });
-      onNotify('Registro metodológico da prancha salvo no Firestore.');
+      onNotify('Registro metodológico salvo no caderno local.');
     } catch (err: unknown) {
-      onNotify(err instanceof Error ? err.message : 'Falha ao salvar registro no Firestore.');
+      onNotify(err instanceof Error ? err.message : 'Falha ao salvar registro localmente.');
     } finally {
-      setIsSavingFirestore(false);
-    }
-  };
-
-  const handleSavePngToDrive = async () => {
-    if (!result) return;
-    setIsSavingDrive(true);
-    try {
-      const folder = await findDriveFolderByName('ICONOCRACIA — Dossiê Doutoral');
-      const cleanName = `${(title.trim() || 'Prancha-Atelier').slice(0, 60)}.png`;
-      const file = dataUrlToFile(result.imageUrl, cleanName);
-      const uploaded = await uploadBinaryFileToDrive({
-        file,
-        parentId: folder?.id || null,
-        description: `Prancha de estudo gerada/editada no Atelier ICONOCRACIA (${result.aspectRatio}, ${result.imageSize}) — Prompt: ${result.promptUsed.slice(
-          0,
-          240
-        )}`,
-      });
-      onNotify(`Prancha "${uploaded.name}" arquivada no Google Drive.`);
-    } catch (err: unknown) {
-      onNotify(err instanceof Error ? err.message : 'Falha ao enviar PNG ao Google Drive.');
-    } finally {
-      setIsSavingDrive(false);
+      setIsSavingLocal(false);
     }
   };
 
@@ -376,16 +330,16 @@ export function IconographicImageAtelier({
         {/* Left Column: Controls Form */}
         <form
           onSubmit={handleSubmit}
-          className="lg:col-span-6 p-6 sm:p-8 bg-white/70 border border-[#1c1c1c] space-y-6"
+          className="lg:col-span-6 p-6 sm:p-8 bg-white/70 dark:bg-[#161616] border border-[#1c1c1c] dark:border-[#f2efeb]/65 space-y-6"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1c1c1c]/15 pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 pb-4">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#7e2a1f]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#7e2a1f] dark:text-[#e5988b]">
                 ATELIER ICONOGRÁFICO · ALTA RESOLUÇÃO (1K–4K)
               </p>
               <h2
                 id="atelier-heading"
-                className="font-serif text-2xl sm:text-3xl font-medium text-[#1c1c1c]"
+                className="font-serif text-2xl sm:text-3xl font-medium text-[#1c1c1c] dark:text-[#f2efeb]"
               >
                 Criar ou editar pranchas de estudo
               </h2>
@@ -395,15 +349,15 @@ export function IconographicImageAtelier({
             <div
               role="group"
               aria-label="Modo do atelier de pranchas"
-              className="flex items-center border border-[#1c1c1c]"
+              className="flex items-center border border-[#1c1c1c] dark:border-[#f2efeb]/65"
             >
               <button
                 type="button"
                 onClick={() => setMode('create')}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors whitespace-nowrap shrink-0 ${
                   mode === 'create'
-                    ? 'bg-[#1c1c1c] text-[#f2efeb]'
-                    : 'bg-transparent text-[#1c1c1c] hover:bg-[#1c1c1c]/10'
+                    ? 'bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d]'
+                    : 'bg-transparent text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c]/10 dark:hover:bg-[#f2efeb]/10'
                 }`}
               >
                 <ImagePlus className="w-3.5 h-3.5" />
@@ -412,10 +366,10 @@ export function IconographicImageAtelier({
               <button
                 type="button"
                 onClick={() => setMode('edit')}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border-l border-[#1c1c1c] transition-colors whitespace-nowrap shrink-0 ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border-l border-[#1c1c1c] dark:border-[#f2efeb]/65 transition-colors whitespace-nowrap shrink-0 ${
                   mode === 'edit'
-                    ? 'bg-[#7e2a1f] text-[#f2efeb]'
-                    : 'bg-transparent text-[#1c1c1c] hover:bg-[#1c1c1c]/10'
+                    ? 'bg-[#7e2a1f] dark:bg-[#e5988b] text-[#f2efeb] dark:text-[#0d0d0d]'
+                    : 'bg-transparent text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c]/10 dark:hover:bg-[#f2efeb]/10'
                 }`}
               >
                 <Wand2 className="w-3.5 h-3.5" />
@@ -429,7 +383,7 @@ export function IconographicImageAtelier({
             <div className="sm:col-span-2 space-y-1.5">
               <label
                 htmlFor="atelier-plate-title"
-                className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/75"
+                className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/75 dark:text-[#f2efeb]/80"
               >
                 Título da prancha de estudo
               </label>
@@ -439,14 +393,14 @@ export function IconographicImageAtelier({
                 maxLength={240}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3 py-2 bg-[#f2efeb] border border-[#1c1c1c]/45 font-serif text-base text-[#1c1c1c] focus:outline-none focus:border-[#7e2a1f]"
+                className="w-full px-3 py-2 bg-[#f2efeb] dark:bg-[#121212] border border-[#1c1c1c]/45 dark:border-[#f2efeb]/45 font-serif text-base text-[#1c1c1c] dark:text-[#f2efeb] focus:outline-none focus:border-[#7e2a1f] dark:focus:border-[#e5988b]"
               />
             </div>
 
             <div className="space-y-1.5">
               <label
                 htmlFor="atelier-axis"
-                className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/75"
+                className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/75 dark:text-[#f2efeb]/80"
               >
                 Eixo analítico
               </label>
@@ -454,7 +408,7 @@ export function IconographicImageAtelier({
                 id="atelier-axis"
                 value={axis}
                 onChange={(e) => setAxis(e.target.value as AtlasAxis)}
-                className="w-full px-3 py-2.5 bg-[#f2efeb] border border-[#1c1c1c]/45 font-mono text-[11px] text-[#1c1c1c] focus:outline-none focus:border-[#7e2a1f]"
+                className="w-full px-3 py-2.5 bg-[#f2efeb] dark:bg-[#121212] border border-[#1c1c1c]/45 dark:border-[#f2efeb]/45 font-mono text-[11px] text-[#1c1c1c] dark:text-[#f2efeb] focus:outline-none focus:border-[#7e2a1f] dark:focus:border-[#e5988b]"
               >
                 <option value="venda">Venda (1494–1603)</option>
                 <option value="imperio">Império (1822–1839)</option>
@@ -465,12 +419,12 @@ export function IconographicImageAtelier({
 
           {/* Source Image Picker when in Edit Mode */}
           {mode === 'edit' && (
-            <div className="p-4 bg-[#f2efeb] border border-[#1c1c1c]/35 space-y-3">
+            <div className="p-4 bg-[#f2efeb] dark:bg-[#1a1a1a] border border-[#1c1c1c]/35 dark:border-[#f2efeb]/40 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#7e2a1f] font-bold">
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#7e2a1f] dark:text-[#e5988b] font-bold">
                   Matriz visual para edição
                 </span>
-                <label className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] bg-white text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] cursor-pointer transition-colors whitespace-nowrap shrink-0">
+                <label className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] dark:border-[#f2efeb]/70 bg-white dark:bg-[#222222] text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] cursor-pointer transition-colors whitespace-nowrap shrink-0">
                   <Upload className="w-3 h-3" />
                   <span>Enviar arquivo</span>
                   <input
@@ -483,7 +437,7 @@ export function IconographicImageAtelier({
               </div>
 
               <div className="space-y-1.5">
-                <span className="block font-mono text-[10px] text-[#1c1c1c]/70">
+                <span className="block font-mono text-[10px] text-[#1c1c1c]/70 dark:text-[#f2efeb]/75">
                   Ou carregar prancha do catálogo como base:
                 </span>
                 <div className="flex flex-wrap gap-1.5">
@@ -493,7 +447,7 @@ export function IconographicImageAtelier({
                       type="button"
                       disabled={loadingSourceId === entry.id}
                       onClick={() => handleLoadCanonicalPlate(entry)}
-                      className="px-2.5 py-1 font-mono text-[10px] border border-[#1c1c1c]/35 bg-white/80 text-[#1c1c1c] hover:border-[#1c1c1c] transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
+                      className="px-2.5 py-1 font-mono text-[10px] border border-[#1c1c1c]/35 dark:border-[#f2efeb]/40 bg-white/80 dark:bg-[#222222] text-[#1c1c1c] dark:text-[#f2efeb] hover:border-[#1c1c1c] dark:hover:border-[#f2efeb] transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
                     >
                       {loadingSourceId === entry.id
                         ? 'Carregando...'
@@ -504,18 +458,18 @@ export function IconographicImageAtelier({
               </div>
 
               {sourceImageDataUrl && (
-                <div className="flex items-center gap-3 pt-2 border-t border-[#1c1c1c]/15">
+                <div className="flex items-center gap-3 pt-2 border-t border-[#1c1c1c]/15 dark:border-[#f2efeb]/20">
                   <img
                     src={sourceImageDataUrl}
                     alt="Matriz selecionada para edição"
                     referrerPolicy="no-referrer"
-                    className="w-16 h-12 object-cover border border-[#1c1c1c]/40 bg-white shrink-0"
+                    className="w-16 h-12 object-cover border border-[#1c1c1c]/40 dark:border-[#f2efeb]/45 bg-white dark:bg-[#121212] shrink-0"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="font-mono text-[10px] text-[#1c1c1c] truncate">
+                    <p className="font-mono text-[10px] text-[#1c1c1c] dark:text-[#f2efeb] truncate">
                       Matriz ativa: {sourceLabel}
                     </p>
-                    <p className="font-mono text-[10px] text-[#1c1c1c]/60">
+                    <p className="font-mono text-[10px] text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">
                       Descreva abaixo a transformação formal, material ou luminosa desejada.
                     </p>
                   </div>
@@ -526,7 +480,7 @@ export function IconographicImageAtelier({
 
           {/* Curated Presets */}
           <div className="space-y-2">
-            <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/70">
+            <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/70 dark:text-[#f2efeb]/75">
               {mode === 'create'
                 ? 'Matrizes descritivas sugeridas:'
                 : 'Operações comparativas sugeridas:'}
@@ -543,7 +497,7 @@ export function IconographicImageAtelier({
                         setAspectRatio(preset.aspect);
                         setPrompt(preset.prompt);
                       }}
-                      className="px-2.5 py-1 font-mono text-[10px] border border-[#1c1c1c]/35 bg-[#f2efeb] text-[#1c1c1c] hover:border-[#7e2a1f] hover:text-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+                      className="px-2.5 py-1 font-mono text-[10px] border border-[#1c1c1c]/35 dark:border-[#f2efeb]/40 bg-[#f2efeb] dark:bg-[#1e1e1e] text-[#1c1c1c] dark:text-[#f2efeb] hover:border-[#7e2a1f] dark:hover:border-[#e5988b] hover:text-[#7e2a1f] dark:hover:text-[#e5988b] transition-colors whitespace-nowrap shrink-0"
                     >
                       {preset.label}
                     </button>
@@ -553,7 +507,7 @@ export function IconographicImageAtelier({
                       key={preset.label}
                       type="button"
                       onClick={() => setPrompt(preset.prompt)}
-                      className="px-2.5 py-1 font-mono text-[10px] border border-[#1c1c1c]/35 bg-[#f2efeb] text-[#1c1c1c] hover:border-[#7e2a1f] hover:text-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+                      className="px-2.5 py-1 font-mono text-[10px] border border-[#1c1c1c]/35 dark:border-[#f2efeb]/40 bg-[#f2efeb] dark:bg-[#1e1e1e] text-[#1c1c1c] dark:text-[#f2efeb] hover:border-[#7e2a1f] dark:hover:border-[#e5988b] hover:text-[#7e2a1f] dark:hover:text-[#e5988b] transition-colors whitespace-nowrap shrink-0"
                     >
                       {preset.label}
                     </button>
@@ -565,7 +519,7 @@ export function IconographicImageAtelier({
           <div className="space-y-1.5">
             <label
               htmlFor="atelier-prompt"
-              className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/75"
+              className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/75 dark:text-[#f2efeb]/80"
             >
               {mode === 'create'
                 ? 'Descrição iconográfica e técnica (gravura, suporte, atributos, iluminação)'
@@ -578,14 +532,14 @@ export function IconographicImageAtelier({
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Descreva os elementos formais, técnica gráfica, suporte material e enquadramento..."
-              className="w-full p-3 bg-[#f2efeb] border border-[#1c1c1c]/45 font-serif text-base leading-relaxed text-[#1c1c1c] focus:outline-none focus:border-[#7e2a1f]"
+              className="w-full p-3 bg-[#f2efeb] dark:bg-[#121212] border border-[#1c1c1c]/45 dark:border-[#f2efeb]/45 font-serif text-base leading-relaxed text-[#1c1c1c] dark:text-[#f2efeb] placeholder:text-[#1c1c1c]/45 dark:placeholder:text-[#f2efeb]/45 focus:outline-none focus:border-[#7e2a1f] dark:focus:border-[#e5988b]"
             />
           </div>
 
           {/* Aspect Ratio, Resolution & Search Grounding */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
             <div className="space-y-1.5">
-              <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/75">
+              <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/75 dark:text-[#f2efeb]/80">
                 Proporção da prancha
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -596,8 +550,8 @@ export function IconographicImageAtelier({
                     onClick={() => setAspectRatio(ratio)}
                     className={`px-2.5 py-1 font-mono text-[10px] border tabular-nums transition-colors whitespace-nowrap shrink-0 ${
                       aspectRatio === ratio
-                        ? 'bg-[#1c1c1c] text-[#f2efeb] border-[#1c1c1c]'
-                        : 'bg-[#f2efeb] text-[#1c1c1c]/80 border-[#1c1c1c]/35 hover:border-[#1c1c1c]'
+                        ? 'bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d] border-[#1c1c1c] dark:border-[#f2efeb]'
+                        : 'bg-[#f2efeb] dark:bg-[#1e1e1e] text-[#1c1c1c]/80 dark:text-[#f2efeb]/85 border-[#1c1c1c]/35 dark:border-[#f2efeb]/40 hover:border-[#1c1c1c] dark:hover:border-[#f2efeb]'
                     }`}
                   >
                     {ratio}
@@ -607,7 +561,7 @@ export function IconographicImageAtelier({
             </div>
 
             <div className="space-y-1.5">
-              <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/75">
+              <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#1c1c1c]/75 dark:text-[#f2efeb]/80">
                 Resolução de saída
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -618,8 +572,8 @@ export function IconographicImageAtelier({
                     onClick={() => setImageSize(sz)}
                     className={`px-3 py-1 font-mono text-[10px] border tabular-nums transition-colors whitespace-nowrap shrink-0 ${
                       imageSize === sz
-                        ? 'bg-[#7e2a1f] text-[#f2efeb] border-[#7e2a1f]'
-                        : 'bg-[#f2efeb] text-[#1c1c1c]/80 border-[#1c1c1c]/35 hover:border-[#1c1c1c]'
+                        ? 'bg-[#7e2a1f] dark:bg-[#e5988b] text-[#f2efeb] dark:text-[#0d0d0d] border-[#7e2a1f] dark:border-[#e5988b]'
+                        : 'bg-[#f2efeb] dark:bg-[#1e1e1e] text-[#1c1c1c]/80 dark:text-[#f2efeb]/85 border-[#1c1c1c]/35 dark:border-[#f2efeb]/40 hover:border-[#1c1c1c] dark:hover:border-[#f2efeb]'
                     }`}
                   >
                     {sz}
@@ -634,9 +588,9 @@ export function IconographicImageAtelier({
               type="checkbox"
               checked={useWebGrounding}
               onChange={(e) => setUseWebGrounding(e.target.checked)}
-              className="mt-0.5 accent-[#7e2a1f]"
+              className="mt-0.5 accent-[#7e2a1f] dark:accent-[#e5988b]"
             />
-            <span className="text-xs leading-snug text-[#1c1c1c]/80">
+            <span className="text-xs leading-snug text-[#1c1c1c]/80 dark:text-[#f2efeb]/85">
               Ancorar referências visuais e históricas com busca na Web e Google Imagens
             </span>
           </label>
@@ -644,21 +598,21 @@ export function IconographicImageAtelier({
           {errorMsg && (
             <div
               role="alert"
-              className="p-3.5 bg-[#7e2a1f]/10 border border-[#7e2a1f] font-mono text-[11px] text-[#7e2a1f]"
+              className="p-3.5 bg-[#7e2a1f]/10 dark:bg-[#e5988b]/10 border border-[#7e2a1f] dark:border-[#e5988b] font-mono text-[11px] text-[#7e2a1f] dark:text-[#e5988b]"
             >
               {errorMsg}
             </div>
           )}
 
-          <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-[#1c1c1c]/15">
-            <span className="font-mono text-[10px] text-[#1c1c1c]/60">
+          <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-[#1c1c1c]/15 dark:border-[#f2efeb]/20">
+            <span className="font-mono text-[10px] text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">
               Estudo formal separado de fontes primárias
             </span>
 
             <button
               type="submit"
               disabled={isGenerating}
-              className="inline-flex items-center gap-2 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] transition-colors whitespace-nowrap shrink-0 disabled:opacity-55"
+              className="inline-flex items-center gap-2 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] border border-[#1c1c1c] dark:border-[#f2efeb] bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] dark:hover:bg-[#e5988b] dark:hover:border-[#e5988b] transition-colors whitespace-nowrap shrink-0 disabled:opacity-55"
             >
               {isGenerating ? (
                 <>
@@ -681,13 +635,13 @@ export function IconographicImageAtelier({
 
         {/* Right Column: Light-Table Preview & Archival Persistence */}
         <div className="lg:col-span-6 space-y-6">
-          <div className="p-6 sm:p-8 bg-white/70 border border-[#1c1c1c] space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1c1c1c]/15 pb-3">
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#7e2a1f]">
+          <div className="p-6 sm:p-8 bg-white/70 dark:bg-[#161616] border border-[#1c1c1c] dark:border-[#f2efeb]/65 space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 pb-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#7e2a1f] dark:text-[#e5988b]">
                 PROVA DE ESTUDO · MESA DE INSPEÇÃO
               </span>
               {result && (
-                <span className="font-mono text-[10px] text-[#1c1c1c]/65 tabular-nums">
+                <span className="font-mono text-[10px] text-[#1c1c1c]/65 dark:text-[#f2efeb]/70 tabular-nums">
                   {result.mode === 'edit' ? 'EDIÇÃO' : 'CRIAÇÃO'} · {result.aspectRatio} ·{' '}
                   {result.imageSize}
                 </span>
@@ -696,7 +650,7 @@ export function IconographicImageAtelier({
 
             {result ? (
               <div className="space-y-4">
-                <div className="relative w-full overflow-hidden bg-[#e7e2da] border border-[#1c1c1c]/35">
+                <div className="relative w-full overflow-hidden bg-[#e7e2da] dark:bg-[#121212] border border-[#1c1c1c]/35 dark:border-[#f2efeb]/40">
                   <img
                     src={result.imageUrl}
                     alt={title}
@@ -706,14 +660,14 @@ export function IconographicImageAtelier({
                 </div>
 
                 {result.notes && (
-                  <p className="text-xs font-serif italic leading-relaxed text-[#1c1c1c]/80">
+                  <p className="text-xs font-serif italic leading-relaxed text-[#1c1c1c]/80 dark:text-[#f2efeb]/85">
                     {result.notes}
                   </p>
                 )}
 
                 {result.sources.length > 0 && (
-                  <div className="pt-2 border-t border-[#1c1c1c]/15 space-y-1">
-                    <span className="block font-mono text-[10px] uppercase tracking-[0.12em] text-[#1c1c1c]/65">
+                  <div className="pt-2 border-t border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 space-y-1">
+                    <span className="block font-mono text-[10px] uppercase tracking-[0.12em] text-[#1c1c1c]/65 dark:text-[#f2efeb]/70">
                       Referências consultadas:
                     </span>
                     <div className="flex flex-wrap gap-3">
@@ -723,7 +677,7 @@ export function IconographicImageAtelier({
                           href={s.uri}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 font-mono text-[10px] text-[#7e2a1f] hover:underline truncate max-w-[240px]"
+                          className="inline-flex items-center gap-1 font-mono text-[10px] text-[#7e2a1f] dark:text-[#e5988b] hover:underline truncate max-w-[240px]"
                         >
                           <span className="truncate">{s.title}</span>
                           <ExternalLink className="w-3 h-3 shrink-0" />
@@ -733,11 +687,11 @@ export function IconographicImageAtelier({
                   </div>
                 )}
 
-                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#1c1c1c]/15">
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#1c1c1c]/15 dark:border-[#f2efeb]/20">
                   <button
                     type="button"
                     onClick={handleInspectGeneratedPlate}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] bg-[#1c1c1c] text-[#f2efeb] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] dark:border-[#f2efeb] bg-[#1c1c1c] dark:bg-[#f2efeb] text-[#f2efeb] dark:text-[#0d0d0d] hover:bg-[#7e2a1f] hover:border-[#7e2a1f] dark:hover:bg-[#e5988b] dark:hover:border-[#e5988b] transition-colors whitespace-nowrap shrink-0"
                   >
                     <Expand className="w-3.5 h-3.5" />
                     <span>Lupa 400%</span>
@@ -746,7 +700,7 @@ export function IconographicImageAtelier({
                   <button
                     type="button"
                     onClick={handleUseResultAsEditSource}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] dark:border-[#f2efeb]/70 text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     <span>Refinar / Editar esta prancha</span>
@@ -755,61 +709,29 @@ export function IconographicImageAtelier({
                   <button
                     type="button"
                     onClick={handleDownloadPng}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c] dark:border-[#f2efeb]/70 text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Baixar PNG</span>
                   </button>
 
-                  {canSaveToFirestore ? (
-                    <button
-                      type="button"
-                      disabled={isSavingFirestore}
-                      onClick={handleSaveRecordFirestore}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#7e2a1f] text-[#7e2a1f] hover:bg-[#7e2a1f] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
-                    >
-                      <Database className="w-3.5 h-3.5" />
-                      <span>{isSavingFirestore ? 'Salvando...' : 'Registrar no Firestore'}</span>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={onSignInCloud}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c]/40 text-[#1c1c1c]/80 hover:border-[#1c1c1c] transition-colors whitespace-nowrap shrink-0"
-                    >
-                      <Database className="w-3.5 h-3.5" />
-                      <span>Conectar Firestore</span>
-                    </button>
-                  )}
-
-                  {canSaveToDrive ? (
-                    <button
-                      type="button"
-                      disabled={isSavingDrive}
-                      onClick={handleSavePngToDrive}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#1c1c1c]/50 text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
-                    >
-                      <CloudUpload className="w-3.5 h-3.5" />
-                      <span>{isSavingDrive ? 'Enviando...' : 'Salvar PNG no Drive'}</span>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={onOpenDriveView}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] text-[#1c1c1c]/70 hover:text-[#7e2a1f] transition-colors whitespace-nowrap shrink-0"
-                    >
-                      <CloudUpload className="w-3.5 h-3.5" />
-                      <span>Conectar Drive</span>
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    disabled={isSavingLocal}
+                    onClick={handleSaveRecordLocal}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.1em] border border-[#7e2a1f] dark:border-[#e5988b] text-[#7e2a1f] dark:text-[#e5988b] hover:bg-[#7e2a1f] hover:text-[#f2efeb] dark:hover:bg-[#e5988b] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
+                  >
+                    <BookmarkPlus className="w-3.5 h-3.5" />
+                    <span>{isSavingLocal ? 'Salvando...' : 'Salvar no caderno local'}</span>
+                  </button>
                 </div>
               </div>
             ) : (
-              <div className="py-16 px-6 bg-[#f2efeb] border border-dashed border-[#1c1c1c]/30 text-center space-y-2">
-                <p className="font-serif text-xl text-[#1c1c1c]">
+              <div className="py-16 px-6 bg-[#f2efeb] dark:bg-[#121212] border border-dashed border-[#1c1c1c]/30 dark:border-[#f2efeb]/35 text-center space-y-2">
+                <p className="font-serif text-xl text-[#1c1c1c] dark:text-[#f2efeb]">
                   Nenhuma prova gerada nesta sessão
                 </p>
-                <p className="text-xs leading-relaxed text-[#1c1c1c]/70 max-w-md mx-auto">
+                <p className="text-xs leading-relaxed text-[#1c1c1c]/70 dark:text-[#f2efeb]/75 max-w-md mx-auto">
                   Utilize o formulário ao lado para sintetizar uma prancha comparativa em 1K, 2K ou
                   4K ou carregue uma das seis pranchas do Atlas para testar variações formais e
                   atributos alegóricos.
@@ -818,40 +740,39 @@ export function IconographicImageAtelier({
             )}
           </div>
 
-          {/* Saved Firestore Plate Metadata Ledger */}
-          <div className="p-6 bg-white/55 border border-[#1c1c1c]/35 space-y-3">
-            <div className="flex items-center justify-between gap-2 border-b border-[#1c1c1c]/15 pb-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#7e2a1f]">
-                CADERNO DE MATRIZES SALVAS NO FIRESTORE ({plateRecords.length})
+          {/* Saved Local Plate Metadata Ledger */}
+          <div className="p-6 bg-white/55 dark:bg-[#161616] border border-[#1c1c1c]/35 dark:border-[#f2efeb]/40 space-y-3">
+            <div className="flex items-center justify-between gap-2 border-b border-[#1c1c1c]/15 dark:border-[#f2efeb]/20 pb-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#7e2a1f] dark:text-[#e5988b]">
+                CADERNO LOCAL DE MATRIZES ({plateRecords.length})
               </span>
-              <span className="font-mono text-[10px] text-[#1c1c1c]/60">
-                Metadados e instruções sincronizados
+              <span className="font-mono text-[10px] text-[#1c1c1c]/60 dark:text-[#f2efeb]/70">
+                Metadados e instruções salvos no navegador
               </span>
             </div>
 
             {plateRecords.length === 0 ? (
-              <p className="text-xs text-[#1c1c1c]/70">
-                {canSaveToFirestore
-                  ? 'Nenhuma matriz iconográfica registrada ainda no seu caderno Firestore.'
-                  : 'Autentique sua conta Google no topo da página para sincronizar seu caderno de matrizes e instruções entre sessões.'}
+              <p className="text-xs text-[#1c1c1c]/70 dark:text-[#f2efeb]/75">
+                Nenhuma matriz iconográfica registrada ainda neste navegador. Gere uma prancha ou
+                salve uma vista do Gabinete 3D para reutilizá-la aqui.
               </p>
             ) : (
-              <div className="divide-y divide-[#1c1c1c]/15 max-h-60 overflow-y-auto pr-1">
+              <div className="divide-y divide-[#1c1c1c]/15 dark:divide-[#f2efeb]/15 max-h-60 overflow-y-auto pr-1">
                 {plateRecords.map((rec) => (
                   <div
                     key={rec.id}
                     className="py-3 first:pt-1 last:pb-0 flex items-start justify-between gap-3"
                   >
                     <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-[#1c1c1c]/65 tabular-nums">
-                        <span className="uppercase text-[#7e2a1f] font-bold">{rec.axis}</span>
+                      <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-[#1c1c1c]/65 dark:text-[#f2efeb]/70 tabular-nums">
+                        <span className="uppercase text-[#7e2a1f] dark:text-[#e5988b] font-bold">{rec.axis}</span>
                         <span aria-hidden="true">·</span>
                         <span>{rec.specSummary}</span>
                       </div>
-                      <p className="font-serif text-base font-medium text-[#1c1c1c] truncate">
+                      <p className="font-serif text-base font-medium text-[#1c1c1c] dark:text-[#f2efeb] truncate">
                         {rec.title}
                       </p>
-                      <p className="text-xs text-[#1c1c1c]/75 line-clamp-2">
+                      <p className="text-xs text-[#1c1c1c]/75 dark:text-[#f2efeb]/80 line-clamp-2">
                         {rec.promptOrSummary}
                       </p>
                     </div>
@@ -865,15 +786,15 @@ export function IconographicImageAtelier({
                           setPrompt(rec.promptOrSummary);
                           onNotify('Instrução carregada no formulário do atelier.');
                         }}
-                        className="px-2.5 py-1 font-mono text-[10px] uppercase border border-[#1c1c1c]/40 text-[#1c1c1c] hover:bg-[#1c1c1c] hover:text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
+                        className="px-2.5 py-1 font-mono text-[10px] uppercase border border-[#1c1c1c]/40 dark:border-[#f2efeb]/45 text-[#1c1c1c] dark:text-[#f2efeb] hover:bg-[#1c1c1c] hover:text-[#f2efeb] dark:hover:bg-[#f2efeb] dark:hover:text-[#0d0d0d] transition-colors whitespace-nowrap shrink-0"
                       >
                         Reusar
                       </button>
                       <button
                         type="button"
-                        onClick={() => void onDeleteFirestoreRecord(rec.id)}
+                        onClick={() => void onDeleteLocalRecord(rec.id)}
                         aria-label={`Remover registro ${rec.title}`}
-                        className="p-1.5 text-[#1c1c1c]/55 hover:text-[#7e2a1f] transition-colors"
+                        className="p-1.5 text-[#1c1c1c]/55 dark:text-[#f2efeb]/65 hover:text-[#7e2a1f] dark:hover:text-[#e5988b] transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

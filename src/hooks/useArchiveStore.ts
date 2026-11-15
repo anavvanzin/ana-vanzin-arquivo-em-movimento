@@ -1,30 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import {
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  query,
-  serverTimestamp,
-  setDoc,
-  Timestamp,
-  updateDoc,
-  where,
-} from 'firebase/firestore';
 import rawBundle from '../data/canonicalBundle.json';
 import { getDefaultPresenterNote } from '../data/atlasCatalog';
-import {
-  auth,
-  db,
-  ensureUserWorkspaceDocument,
-  handleFirestoreError,
-  makeFirestoreRevisionId,
-  OperationType,
-  sanitizeBoundedString,
-  signInWithFirebaseGoogle,
-  WORKSPACE_CONSTRAINTS,
-} from '../firebase';
 import {
   AtlasAxis,
   CanonicalBundle,
@@ -35,8 +11,11 @@ import {
   SlideItem,
   SlideOverride,
 } from '../types';
+import { sanitizeBoundedString, WORKSPACE_CONSTRAINTS } from '../utils/constraints';
 
 const STORAGE_KEY = 'iconocracia_authorial_store_v1';
+const NOTES_STORAGE_KEY = 'iconocracia_research_notes_v1';
+const ATELIER_STORAGE_KEY = 'iconocracia_atelier_records_v1';
 
 const canonicalBundle = rawBundle as unknown as CanonicalBundle;
 
@@ -67,103 +46,6 @@ function makeSlideKey(deck: DeckId, lang: LangCode, index: number): string {
   return `${deck}:${lang}:${index}`;
 }
 
-function serializeOverrideForFirestore(
-  uid: string,
-  deck: DeckId,
-  lang: LangCode,
-  slideIndex: number,
-  ov: SlideOverride,
-  includeImmutableFields: boolean
-): Record<string, unknown> {
-  const safeIdx = Math.max(0, Math.min(13, Math.floor(slideIndex)));
-  const blocks = Array.isArray(ov.blocks) ? ov.blocks.slice(0, 4) : undefined;
-  const blockCount = blocks ? blocks.length : 0;
-
-  const payload: Record<string, unknown> = {
-    reviewStatus: ov.status === 'approved' ? 'approved' : 'pending',
-    blockCount,
-    title: sanitizeBoundedString(ov.title ?? '', WORKSPACE_CONSTRAINTS.MAX_TITLE_LEN),
-    footer: sanitizeBoundedString(ov.footer ?? '', WORKSPACE_CONSTRAINTS.MAX_FOOTER_LEN),
-    b0Label: sanitizeBoundedString(blocks?.[0]?.label, WORKSPACE_CONSTRAINTS.MAX_BLOCK_LABEL_LEN),
-    b0Text: sanitizeBoundedString(blocks?.[0]?.text, WORKSPACE_CONSTRAINTS.MAX_BLOCK_TEXT_LEN),
-    b1Label: sanitizeBoundedString(blocks?.[1]?.label, WORKSPACE_CONSTRAINTS.MAX_BLOCK_LABEL_LEN),
-    b1Text: sanitizeBoundedString(blocks?.[1]?.text, WORKSPACE_CONSTRAINTS.MAX_BLOCK_TEXT_LEN),
-    b2Label: sanitizeBoundedString(blocks?.[2]?.label, WORKSPACE_CONSTRAINTS.MAX_BLOCK_LABEL_LEN),
-    b2Text: sanitizeBoundedString(blocks?.[2]?.text, WORKSPACE_CONSTRAINTS.MAX_BLOCK_TEXT_LEN),
-    b3Label: sanitizeBoundedString(blocks?.[3]?.label, WORKSPACE_CONSTRAINTS.MAX_BLOCK_LABEL_LEN),
-    b3Text: sanitizeBoundedString(blocks?.[3]?.text, WORKSPACE_CONSTRAINTS.MAX_BLOCK_TEXT_LEN),
-    philologicalNote: sanitizeBoundedString(
-      ov.philologicalNote,
-      WORKSPACE_CONSTRAINTS.MAX_PHILOLOGY_LEN
-    ),
-    presenterNote: sanitizeBoundedString(
-      ov.presenterNote,
-      WORKSPACE_CONSTRAINTS.MAX_PRESENTER_NOTE_LEN
-    ),
-    updatedAt: serverTimestamp(),
-  };
-
-  if (includeImmutableFields) {
-    payload.ownerId = uid;
-    payload.deck = deck;
-    payload.lang = lang;
-    payload.slideIndex = safeIdx;
-    payload.createdAt = serverTimestamp();
-  }
-
-  return payload;
-}
-
-function deserializeFirestoreRevision(
-  data: Record<string, unknown>,
-  canonicalSlide?: SlideItem
-): SlideOverride {
-  const ov: SlideOverride = {};
-
-  if (data.reviewStatus === 'approved' || data.reviewStatus === 'locked') {
-    ov.status = 'approved';
-  } else if (data.reviewStatus === 'pending') {
-    ov.status = 'pending';
-  }
-
-  if (typeof data.title === 'string' && data.title.length > 0) {
-    if (!canonicalSlide || data.title !== canonicalSlide.title) {
-      ov.title = data.title;
-    }
-  }
-
-  if (typeof data.footer === 'string' && data.footer.length > 0) {
-    if (!canonicalSlide || data.footer !== canonicalSlide.footer) {
-      ov.footer = data.footer;
-    }
-  }
-
-  const blockCount = typeof data.blockCount === 'number' ? data.blockCount : 0;
-  if (blockCount > 0 && blockCount <= 4) {
-    const reconstructed: SlideBlock[] = [];
-    for (let i = 0; i < blockCount; i++) {
-      const label = typeof data[`b${i}Label`] === 'string' ? (data[`b${i}Label`] as string) : '';
-      const text = typeof data[`b${i}Text`] === 'string' ? (data[`b${i}Text`] as string) : '';
-      reconstructed.push({ label, text });
-    }
-    ov.blocks = reconstructed;
-  }
-
-  if (typeof data.philologicalNote === 'string' && data.philologicalNote.length > 0) {
-    ov.philologicalNote = data.philologicalNote;
-  }
-
-  if (typeof data.presenterNote === 'string' && data.presenterNote.length > 0) {
-    ov.presenterNote = data.presenterNote;
-  }
-
-  if (data.updatedAt instanceof Timestamp) {
-    ov.updatedAt = data.updatedAt.toDate().toISOString();
-  }
-
-  return ov;
-}
-
 export function useArchiveStore() {
   const [overrides, setOverrides] = useState<OverridesMap>(() => {
     try {
@@ -174,14 +56,24 @@ export function useArchiveStore() {
     }
   });
 
-  const [firebaseUser, setFirebaseUser] = useState<User | null>(() => auth.currentUser);
-  const [isAuthReady, setIsAuthReady] = useState<boolean>(false);
-  const [workspaceReady, setWorkspaceReady] = useState<boolean>(false);
-  const [savedResearchNotes, setSavedResearchNotes] = useState<SavedResearchNote[]>([]);
-  const [savedAtelierRecords, setSavedAtelierRecords] = useState<SavedAtelierRecord[]>([]);
+  const [savedResearchNotes, setSavedResearchNotes] = useState<SavedResearchNote[]>(() => {
+    try {
+      const raw = localStorage.getItem(NOTES_STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as SavedResearchNote[]) : [];
+    } catch {
+      return [];
+    }
+  });
 
-  const existingRevisionIdsRef = useRef<Set<string>>(new Set());
-  const debounceTimersRef = useRef<Record<string, number>>({});
+  const [savedAtelierRecords, setSavedAtelierRecords] = useState<SavedAtelierRecord[]>(() => {
+    try {
+      const raw = localStorage.getItem(ATELIER_STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as SavedAtelierRecord[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const latestOverridesRef = useRef<OverridesMap>(overrides);
   latestOverridesRef.current = overrides;
 
@@ -197,28 +89,21 @@ export function useArchiveStore() {
     }
   }, [overrides]);
 
-  // 1. Track Firebase Auth & Bootstrap User Workspace Root (/users/{uid})
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setFirebaseUser(user);
-      setIsAuthReady(true);
-      if (user && user.emailVerified) {
-        try {
-          const ok = await ensureUserWorkspaceDocument(user, 'representacao', 'pt');
-          setWorkspaceReady(ok);
-        } catch (err) {
-          console.warn('Sincronização Firestore temporariamente indisponível ou offline:', err);
-          setWorkspaceReady(false);
-        }
-      } else {
-        setWorkspaceReady(false);
-        existingRevisionIdsRef.current.clear();
-        setSavedResearchNotes([]);
-        setSavedAtelierRecords([]);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+    try {
+      localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(savedResearchNotes));
+    } catch {
+      // Ignore browser localStorage quota errors
+    }
+  }, [savedResearchNotes]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ATELIER_STORAGE_KEY, JSON.stringify(savedAtelierRecords));
+    } catch {
+      // Ignore browser localStorage quota errors
+    }
+  }, [savedAtelierRecords]);
 
   const getCanonicalSlides = useCallback((deck: DeckId, lang: LangCode): SlideItem[] => {
     const raw = canonicalBundle.decks[deck][lang] || canonicalBundle.decks[deck].pt;
@@ -230,187 +115,6 @@ export function useArchiveStore() {
     }
     return raw;
   }, []);
-
-  // 2. Real-Time Firestore Listeners (Only attached when Auth + Workspace are ready)
-  useEffect(() => {
-    if (!isAuthReady || !firebaseUser || !workspaceReady) {
-      return;
-    }
-
-    const uid = firebaseUser.uid;
-    const revisionsPath = `users/${uid}/slideRevisions`;
-    const revisionsQuery = query(
-      collection(db, 'users', uid, 'slideRevisions'),
-      where('ownerId', '==', uid)
-    );
-
-    const unsubRevisions = onSnapshot(
-      revisionsQuery,
-      (snapshot) => {
-        const nextExisting = new Set<string>();
-        const remoteMap: OverridesMap = {};
-
-        snapshot.forEach((docSnap) => {
-          nextExisting.add(docSnap.id);
-          const d = docSnap.data() as Record<string, unknown>;
-          const deck = d.deck as DeckId;
-          const lang = d.lang as LangCode;
-          const slideIndex = typeof d.slideIndex === 'number' ? d.slideIndex : 0;
-          if (
-            (deck === 'representacao' || deck === 'trajeto') &&
-            ['pt', 'en', 'fr', 'it', 'nl'].includes(lang)
-          ) {
-            const canonical = getCanonicalSlides(deck, lang)[slideIndex];
-            remoteMap[makeSlideKey(deck, lang, slideIndex)] = deserializeFirestoreRevision(
-              d,
-              canonical
-            );
-          }
-        });
-
-        existingRevisionIdsRef.current = nextExisting;
-        if (Object.keys(remoteMap).length > 0) {
-          setOverrides((prev) => ({ ...prev, ...remoteMap }));
-        }
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, revisionsPath);
-      }
-    );
-
-    const notesPath = `users/${uid}/researchNotes`;
-    const notesQuery = query(
-      collection(db, 'users', uid, 'researchNotes'),
-      where('ownerId', '==', uid)
-    );
-
-    const unsubNotes = onSnapshot(
-      notesQuery,
-      (snapshot) => {
-        const loaded: SavedResearchNote[] = [];
-        snapshot.forEach((docSnap) => {
-          const d = docSnap.data() as Record<string, unknown>;
-          const updatedAtIso =
-            d.updatedAt instanceof Timestamp
-              ? d.updatedAt.toDate().toISOString()
-              : new Date().toISOString();
-          loaded.push({
-            id: docSnap.id,
-            queryTitle: typeof d.queryTitle === 'string' ? d.queryTitle : '',
-            synthesis: typeof d.synthesis === 'string' ? d.synthesis : '',
-            sourcesSummary: typeof d.sourcesSummary === 'string' ? d.sourcesSummary : '',
-            deck: d.deck === 'trajeto' ? 'trajeto' : 'representacao',
-            status: d.status === 'archived' ? 'archived' : 'active',
-            updatedAtIso,
-          });
-        });
-        loaded.sort((a, b) => b.updatedAtIso.localeCompare(a.updatedAtIso));
-        setSavedResearchNotes(loaded);
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, notesPath);
-      }
-    );
-
-    const atelierPath = `users/${uid}/atelierRecords`;
-    const atelierQuery = query(
-      collection(db, 'users', uid, 'atelierRecords'),
-      where('ownerId', '==', uid)
-    );
-
-    const unsubAtelier = onSnapshot(
-      atelierQuery,
-      (snapshot) => {
-        const loaded: SavedAtelierRecord[] = [];
-        snapshot.forEach((docSnap) => {
-          const d = docSnap.data() as Record<string, unknown>;
-          const updatedAtIso =
-            d.updatedAt instanceof Timestamp
-              ? d.updatedAt.toDate().toISOString()
-              : new Date().toISOString();
-          const rawAxis = d.axis;
-          const axis: AtlasAxis =
-            rawAxis === 'imperio' || rawAxis === 'republica' ? rawAxis : 'venda';
-          loaded.push({
-            id: docSnap.id,
-            kind: d.kind === 'spatial_view' ? 'spatial_view' : 'image_plate',
-            title: typeof d.title === 'string' ? d.title : '',
-            promptOrSummary:
-              typeof d.promptOrSummary === 'string' ? d.promptOrSummary : '',
-            axis,
-            specSummary: typeof d.specSummary === 'string' ? d.specSummary : '',
-            status: d.status === 'archived' ? 'archived' : 'active',
-            updatedAtIso,
-          });
-        });
-        loaded.sort((a, b) => b.updatedAtIso.localeCompare(a.updatedAtIso));
-        setSavedAtelierRecords(loaded);
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, atelierPath);
-      }
-    );
-
-    return () => {
-      unsubRevisions();
-      unsubNotes();
-      unsubAtelier();
-    };
-  }, [firebaseUser, getCanonicalSlides, isAuthReady, workspaceReady]);
-
-  const scheduleCloudSlideSync = useCallback(
-    (deck: DeckId, lang: LangCode, index: number) => {
-      if (!firebaseUser || !workspaceReady || !firebaseUser.emailVerified) return;
-      const uid = firebaseUser.uid;
-      const revId = makeFirestoreRevisionId(deck, lang, index);
-
-      if (debounceTimersRef.current[revId]) {
-        window.clearTimeout(debounceTimersRef.current[revId]);
-      }
-
-      debounceTimersRef.current[revId] = window.setTimeout(async () => {
-        delete debounceTimersRef.current[revId];
-        const currentOv = latestOverridesRef.current[makeSlideKey(deck, lang, index)];
-        if (!currentOv) return;
-
-        const docPath = `users/${uid}/slideRevisions/${revId}`;
-        const docRef = doc(db, 'users', uid, 'slideRevisions', revId);
-        const alreadyExists = existingRevisionIdsRef.current.has(revId);
-
-        if (alreadyExists) {
-          const updatePayload = serializeOverrideForFirestore(
-            uid,
-            deck,
-            lang,
-            index,
-            currentOv,
-            false
-          );
-          try {
-            await updateDoc(docRef, updatePayload);
-          } catch (error) {
-            handleFirestoreError(error, OperationType.UPDATE, docPath);
-          }
-        } else {
-          const createPayload = serializeOverrideForFirestore(
-            uid,
-            deck,
-            lang,
-            index,
-            currentOv,
-            true
-          );
-          try {
-            await setDoc(docRef, createPayload);
-            existingRevisionIdsRef.current.add(revId);
-          } catch (error) {
-            handleFirestoreError(error, OperationType.CREATE, docPath);
-          }
-        }
-      }, 450);
-    },
-    [firebaseUser, workspaceReady]
-  );
 
   const getMergedSlides = useCallback(
     (deck: DeckId, lang: LangCode): SlideItem[] => {
@@ -485,54 +189,26 @@ export function useArchiveStore() {
         latestOverridesRef.current = next;
         return next;
       });
-      scheduleCloudSlideSync(deck, lang, index);
     },
-    [scheduleCloudSlideSync]
+    []
   );
 
-  const resetSlideToCanonical = useCallback(
-    (deck: DeckId, lang: LangCode, index: number) => {
-      const key = makeSlideKey(deck, lang, index);
-      const revId = makeFirestoreRevisionId(deck, lang, index);
-      let hadPreservedPresenter = false;
-
-      setOverrides((prev) => {
-        const current = prev[key];
-        if (!current) return prev;
-        const next = { ...prev };
-        const preservedPresenter = current.presenterNote;
-        if (preservedPresenter) {
-          hadPreservedPresenter = true;
-          next[key] = { presenterNote: preservedPresenter };
-        } else {
-          delete next[key];
-        }
-        latestOverridesRef.current = next;
-        return next;
-      });
-
-      if (hadPreservedPresenter) {
-        scheduleCloudSlideSync(deck, lang, index);
-      } else if (
-        firebaseUser &&
-        workspaceReady &&
-        firebaseUser.emailVerified &&
-        existingRevisionIdsRef.current.has(revId)
-      ) {
-        const uid = firebaseUser.uid;
-        const docPath = `users/${uid}/slideRevisions/${revId}`;
-        void (async () => {
-          try {
-            await deleteDoc(doc(db, 'users', uid, 'slideRevisions', revId));
-            existingRevisionIdsRef.current.delete(revId);
-          } catch (error) {
-            handleFirestoreError(error, OperationType.DELETE, docPath);
-          }
-        })();
+  const resetSlideToCanonical = useCallback((deck: DeckId, lang: LangCode, index: number) => {
+    const key = makeSlideKey(deck, lang, index);
+    setOverrides((prev) => {
+      const current = prev[key];
+      if (!current) return prev;
+      const next = { ...prev };
+      const preservedPresenter = current.presenterNote;
+      if (preservedPresenter) {
+        next[key] = { presenterNote: preservedPresenter };
+      } else {
+        delete next[key];
       }
-    },
-    [firebaseUser, scheduleCloudSlideSync, workspaceReady]
-  );
+      latestOverridesRef.current = next;
+      return next;
+    });
+  }, []);
 
   const getPresenterNote = useCallback(
     (deck: DeckId, index: number, lang: LangCode = 'pt'): string => {
@@ -567,26 +243,18 @@ export function useArchiveStore() {
         latestOverridesRef.current = next;
         return next;
       });
-      scheduleCloudSlideSync(deck, lang, index);
     },
-    [scheduleCloudSlideSync]
+    []
   );
 
-  // Firestore ResearchNote Actions (/users/{uid}/researchNotes/{noteId})
-  const saveResearchNoteToFirestore = useCallback(
+  const saveResearchNote = useCallback(
     async (
       queryTitle: string,
       synthesis: string,
       sources: { title: string; uri: string }[],
       deck: DeckId = 'representacao'
     ): Promise<string> => {
-      if (!firebaseUser || !workspaceReady || !firebaseUser.emailVerified) {
-        throw new Error('Conecte sua conta Google verificada para arquivar fichas no Firestore.');
-      }
-      const uid = firebaseUser.uid;
       const noteId = `note_${Date.now()}`;
-      const docPath = `users/${uid}/researchNotes/${noteId}`;
-
       const boundedTitle =
         sanitizeBoundedString(queryTitle.trim(), WORKSPACE_CONSTRAINTS.MAX_QUERY_TITLE_LEN) ||
         'Consulta documental';
@@ -598,41 +266,26 @@ export function useArchiveStore() {
         WORKSPACE_CONSTRAINTS.MAX_SOURCES_SUMMARY_LEN
       );
 
-      try {
-        await setDoc(doc(db, 'users', uid, 'researchNotes', noteId), {
-          ownerId: uid,
-          queryTitle: boundedTitle,
-          synthesis: boundedSynthesis,
-          sourcesSummary: formattedSources,
-          deck: deck === 'trajeto' ? 'trajeto' : 'representacao',
-          status: 'active',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-        return noteId;
-      } catch (error) {
-        handleFirestoreError(error, OperationType.CREATE, docPath);
-      }
+      const newNote: SavedResearchNote = {
+        id: noteId,
+        queryTitle: boundedTitle,
+        synthesis: boundedSynthesis,
+        sourcesSummary: formattedSources,
+        deck: deck === 'trajeto' ? 'trajeto' : 'representacao',
+        status: 'active',
+        updatedAtIso: new Date().toISOString(),
+      };
+      setSavedResearchNotes((prev) => [newNote, ...prev]);
+      return noteId;
     },
-    [firebaseUser, workspaceReady]
+    []
   );
 
-  const deleteResearchNoteFromFirestore = useCallback(
-    async (noteId: string): Promise<void> => {
-      if (!firebaseUser || !workspaceReady || !WORKSPACE_CONSTRAINTS.ID_REGEX.test(noteId)) return;
-      const uid = firebaseUser.uid;
-      const docPath = `users/${uid}/researchNotes/${noteId}`;
-      try {
-        await deleteDoc(doc(db, 'users', uid, 'researchNotes', noteId));
-      } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, docPath);
-      }
-    },
-    [firebaseUser, workspaceReady]
-  );
+  const deleteResearchNote = useCallback(async (noteId: string): Promise<void> => {
+    setSavedResearchNotes((prev) => prev.filter((n) => n.id !== noteId));
+  }, []);
 
-  // Firestore AtelierRecord Actions (/users/{uid}/atelierRecords/{recordId})
-  const saveAtelierRecordToFirestore = useCallback(
+  const saveAtelierRecord = useCallback(
     async (input: {
       kind: 'image_plate' | 'spatial_view';
       title: string;
@@ -640,15 +293,8 @@ export function useArchiveStore() {
       axis: AtlasAxis;
       specSummary: string;
     }): Promise<string> => {
-      if (!firebaseUser || !workspaceReady || !firebaseUser.emailVerified) {
-        throw new Error(
-          'Conecte sua conta Google verificada para salvar registros do atelier no Firestore.'
-        );
-      }
-      const uid = firebaseUser.uid;
       const prefix = input.kind === 'spatial_view' ? 'spatial' : 'plate';
       const recordId = `${prefix}_${Date.now()}`;
-      const docPath = `users/${uid}/atelierRecords/${recordId}`;
 
       const boundedTitle =
         sanitizeBoundedString(input.title.trim(), WORKSPACE_CONSTRAINTS.MAX_ATELIER_TITLE_LEN) ||
@@ -665,57 +311,24 @@ export function useArchiveStore() {
       const validAxis: AtlasAxis =
         input.axis === 'imperio' || input.axis === 'republica' ? input.axis : 'venda';
 
-      try {
-        await setDoc(doc(db, 'users', uid, 'atelierRecords', recordId), {
-          ownerId: uid,
-          kind: input.kind === 'spatial_view' ? 'spatial_view' : 'image_plate',
-          title: boundedTitle,
-          promptOrSummary: boundedPrompt,
-          axis: validAxis,
-          specSummary: boundedSpec,
-          status: 'active',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-        return recordId;
-      } catch (error) {
-        handleFirestoreError(error, OperationType.CREATE, docPath);
-      }
+      const newRec: SavedAtelierRecord = {
+        id: recordId,
+        kind: input.kind === 'spatial_view' ? 'spatial_view' : 'image_plate',
+        title: boundedTitle,
+        promptOrSummary: boundedPrompt,
+        axis: validAxis,
+        specSummary: boundedSpec,
+        status: 'active',
+        updatedAtIso: new Date().toISOString(),
+      };
+      setSavedAtelierRecords((prev) => [newRec, ...prev]);
+      return recordId;
     },
-    [firebaseUser, workspaceReady]
+    []
   );
 
-  const deleteAtelierRecordFromFirestore = useCallback(
-    async (recordId: string): Promise<void> => {
-      if (!firebaseUser || !workspaceReady || !WORKSPACE_CONSTRAINTS.ID_REGEX.test(recordId))
-        return;
-      const uid = firebaseUser.uid;
-      const docPath = `users/${uid}/atelierRecords/${recordId}`;
-      try {
-        await deleteDoc(doc(db, 'users', uid, 'atelierRecords', recordId));
-      } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, docPath);
-      }
-    },
-    [firebaseUser, workspaceReady]
-  );
-
-  const signInCloudSync = useCallback(async (): Promise<User | null> => {
-    const user = await signInWithFirebaseGoogle();
-    if (user && user.emailVerified) {
-      try {
-        const ok = await ensureUserWorkspaceDocument(user, 'representacao', 'pt');
-        setWorkspaceReady(ok);
-      } catch (err) {
-        console.warn('Workspace sync indisponível temporariamente:', err);
-      }
-    }
-    return user;
-  }, []);
-
-  const signOutCloudSync = useCallback(async (): Promise<void> => {
-    await signOut(auth);
-    setWorkspaceReady(false);
+  const deleteAtelierRecord = useCallback(async (recordId: string): Promise<void> => {
+    setSavedAtelierRecords((prev) => prev.filter((r) => r.id !== recordId));
   }, []);
 
   const getDeckReviewStats = useCallback(
@@ -814,40 +427,18 @@ export function useArchiveStore() {
     [getCanonicalSlides]
   );
 
-  const buildDeckExportJson = useCallback(
-    (deck: DeckId, lang: LangCode): string => {
-      const merged = getMergedSlides(deck, lang);
-      return JSON.stringify(merged, null, 2);
-    },
-    [getMergedSlides]
-  );
-
-  const buildWorkspaceBackupJson = useCallback((): string => {
-    const payload = {
-      project: 'ICONOCRACIA',
-      exportedAt: new Date().toISOString(),
-      overrides,
-    };
-    return JSON.stringify(payload, null, 2);
-  }, [overrides]);
-
   const uiByLang = useMemo(() => canonicalBundle.ui, []);
   const editorialByLang = useMemo(() => canonicalBundle.editorial, []);
 
   return {
     uiByLang,
     editorialByLang,
-    firebaseUser,
-    isAuthReady,
-    cloudSyncActive: Boolean(firebaseUser && workspaceReady && firebaseUser.emailVerified),
     savedResearchNotes,
     savedAtelierRecords,
-    signInCloudSync,
-    signOutCloudSync,
-    saveResearchNoteToFirestore,
-    deleteResearchNoteFromFirestore,
-    saveAtelierRecordToFirestore,
-    deleteAtelierRecordFromFirestore,
+    saveResearchNote,
+    deleteResearchNote,
+    saveAtelierRecord,
+    deleteAtelierRecord,
     getCanonicalSlides,
     getMergedSlides,
     getSlideOverride,
@@ -859,8 +450,6 @@ export function useArchiveStore() {
     getDeckReviewStats,
     exportDeckJson,
     exportFullWorkspace,
-    buildDeckExportJson,
-    buildWorkspaceBackupJson,
     importWorkspaceJson,
   };
 }

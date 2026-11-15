@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 import { getAtlasForSlide, LANGUAGES } from '../data/atlasCatalog';
 import { PORTAL_COPY } from '../data/portalCopy';
-import { WORKSPACE_CONSTRAINTS } from '../firebase';
 import { AtlasEntry, DeckId, LangCode, SlideItem, UIStrings } from '../types';
+import { WORKSPACE_CONSTRAINTS } from '../utils/constraints';
 
 interface PresenterStageProps {
   deck: DeckId;
@@ -25,7 +25,6 @@ interface PresenterStageProps {
   onChangeSlide: (index: number) => void;
   onChangeLang: (lang: LangCode) => void;
   onOpenLightbox: (entry: AtlasEntry, compareWithId?: string) => void;
-  onOpenGoogleSlides?: () => void;
   onExit: () => void;
 }
 
@@ -46,7 +45,6 @@ export function PresenterStage({
   onChangeSlide,
   onChangeLang,
   onOpenLightbox,
-  onOpenGoogleSlides,
   onExit,
 }: PresenterStageProps) {
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
@@ -198,17 +196,6 @@ export function PresenterStage({
               </button>
             ))}
           </div>
-
-          {onOpenGoogleSlides && (
-            <button
-              type="button"
-              onClick={onOpenGoogleSlides}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] bg-[#262626] hover:bg-[#383838] border border-[#f2efeb]/25 text-[#f2efeb] transition-colors whitespace-nowrap shrink-0"
-              title="Apresentar com Google Slides"
-            >
-              <span>Google Slides</span>
-            </button>
-          )}
 
           <button
             type="button"
